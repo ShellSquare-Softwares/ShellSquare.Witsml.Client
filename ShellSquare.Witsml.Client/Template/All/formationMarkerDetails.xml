@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<formationMarkers version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <formationMarker uidWell="" uidWellbore="" uid="">
+    <nameWell />
+    <nameWellbore />
+    <name />
+    <mdPrognosed uom="" datum="" />
+    <tvdPrognosed uom="" datum="" />
+    <mdTopSample uom="" datum="" />
+    <tvdTopSample uom="" datum="" />
+    <thicknessBed uom="" />
+    <thicknessApparent uom="" />
+    <thicknessPerpen uom="" />
+    <mdLogSample uom="" datum="" />
+    <tvdLogSample uom="" datum="" />
+    <dip uom="" />
+    <dipDirection uom="" />
+    <lithostratigraphic kind="" />
+    <chronostratigraphic kind="" />
+    <nameFormation />
+    <description />
+    <commonData>
+      <sourceName />
+      <dTimCreation />
+      <dTimLastChange />
+      <itemState />
+      <serviceCategory />
+      <comments />
+      <acquisitionTimeZone dTim="" />
+      <defaultDatum uidRef="" />
+      <privateGroupOnly />
+      <extensionAny />
+      <extensionNameValue />
+    </commonData>
+    <customData />
+  </formationMarker>
+</formationMarkers>

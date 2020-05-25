@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<attachments version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <attachment uidWell="" uidWellbore="" uid="">
+    <nameWell />
+    <nameWellbore />
+    <name />
+    <objectReference object="" uidRef="" />
+    <subObjectReference object="" uidRef="" />
+    <md uom="" datum="" />
+    <mdBit uom="" datum="" />
+    <param index="" name="" uom="" description="" uid="" />
+    <fileName />
+    <description />
+    <fileType />
+    <content />
+    <commonData>
+      <sourceName />
+      <dTimCreation />
+      <dTimLastChange />
+      <itemState />
+      <serviceCategory />
+      <comments />
+      <acquisitionTimeZone dTim="" />
+      <defaultDatum uidRef="" />
+      <privateGroupOnly />
+      <extensionAny />
+      <extensionNameValue />
+    </commonData>
+    <customData />
+  </attachment>
+</attachments>

@@ -1,0 +1,527 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DB9F9480-28BA-4D79-AC85-94915E8BAC90}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>ShellSquare.Witsml.Client</RootNamespace>
+    <AssemblyName>ShellSquare.Witsml.Client</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ControlzEx, Version=3.0.2.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net462\ControlzEx.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.AvalonEdit, Version=6.0.1.278, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
+      <HintPath>..\packages\AvalonEdit.6.0.1\lib\net45\ICSharpCode.AvalonEdit.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro, Version=1.6.5.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.1.6.5\lib\net47\MahApps.Metro.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net462\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="ColorizeAvalonEdit.cs" />
+    <Compile Include="Common.cs" />
+    <Compile Include="Element.cs" />
+    <Compile Include="ExtensionsForWPF.cs" />
+    <Compile Include="GridNode.cs" />
+    <Compile Include="OptionSelection.xaml.cs">
+      <DependentUpon>OptionSelection.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ServerInfo.cs" />
+    <Compile Include="Servers.xaml.cs">
+      <DependentUpon>Servers.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TabHeaderControl.xaml.cs">
+      <DependentUpon>TabHeaderControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TabItemHeader.xaml.cs">
+      <DependentUpon>TabItemHeader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TreeViewItemGridRow.xaml.cs">
+      <DependentUpon>TreeViewItemGridRow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TreeViewItemHeader.xaml.cs">
+      <DependentUpon>TreeViewItemHeader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WITSMLControl.xaml.cs">
+      <DependentUpon>WITSMLControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WITSMLService.cs" />
+    <Compile Include="WITSMLDataHandler.cs" />
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="OptionSelection.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Servers.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TabHeaderControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TabItemHeader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TreeViewItemGridRow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TreeViewItemHeader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WITSMLControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\Well.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\WellId.xml">
+      <SubType>Designer</SubType>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\WellDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\Wellbore.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\WellboreId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\WellboreDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\Log.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\LogId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\LogDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Configuration.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\attachment.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\attachmentId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\attachmentDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\bhaRun.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\bhaRunDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\bhaRunId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\cementJob.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\cementJobId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\cementJobDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\changeLog.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\changeLogId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\changeLogDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\convCore.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\convCoreId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\convCoreDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\customObject.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\customObjectId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\customObjectDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\fluidsReport.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\fluidsReportId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\fluidsReportDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\formationMarker.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\formationMarkerId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\formationMarkerDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\message.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\messageId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\messageDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\mnemonicSet.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\mnemonicSetId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\mnemonicSetDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\mudLog.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\mudLogId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\mudLogDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\objectGroup.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\objectGroupId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\objectGroupDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\opsReport.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\opsReportId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\opsReportDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\pressureTestPlan.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\pressureTestPlanId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\pressureTestPlanDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\rig.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\risk.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\rigId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\riskId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\rigDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\riskDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\sideWallCore.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\sideWallCoreId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\sideWallCoreDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\stimJob.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\stimJobId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\stimJobDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\surveyProgram.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\surveyProgramId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\surveyProgramDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\target.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\targetId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\targetDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\trajectory.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\trajectoryId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\trajectoryDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\tubular.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\tubularId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\tubularDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\wbGeometry.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\wbGeometryId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\wbGeometryDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\coordinateReference.xml">
+      <SubType>Designer</SubType>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\coordinateReferenceId.xml">
+      <SubType>Designer</SubType>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\coordinateReferenceDetails.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\drillReport.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\drillReportId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\drillReportDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\toolErrorModel.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\toolErrorModelId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\toolErrorModelDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Simple\toolErrorTermSet.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Template\Ids\toolErrorTermSetId.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Template\All\toolErrorTermSetDetails.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Spinner.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="logo.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

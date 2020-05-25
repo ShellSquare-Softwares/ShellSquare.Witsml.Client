@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Template>
+  <Name>Well</Name>
+  <Name>Wellbore</Name>
+  <Name>Log</Name>
+  <Name>attachment</Name>
+  <Name>bhaRun</Name>
+  <Name>cementJob</Name>
+  <Name>changeLog</Name>
+  <Name>convCore</Name>
+  <Name>coordinateReference</Name>
+  <Name>customObject</Name>
+  <Name>drillReport</Name>
+  <Name>fluidsReport</Name>
+  <Name>formationMarker</Name>
+  <Name>message</Name>
+  <Name>mnemonicSet</Name>
+  <Name>mudLog</Name>
+  <Name>objectGroup</Name>
+  <Name>opsReport</Name>
+  <Name>pressureTestPlan</Name>
+  <Name>rig</Name>
+  <Name>risk</Name>
+  <Name>sidewallCore</Name>
+  <Name>stimJob</Name>
+  <Name>surveyProgram</Name>
+  <Name>target</Name>
+  <Name>toolErrorModel</Name>
+  <Name>toolErrorTermSet</Name>
+  <Name>trajectory</Name>
+  <Name>tubular</Name>
+  <Name>wbGeometry</Name>
+</Template>
+

@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<customObjects version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <customObject uidWell="" uidWellbore="" uid="">
+    <nameWell />
+    <nameWellbore />
+    <name />
+    <creationTime />
+    <type />
+    <subtype />
+    <description />
+    <tag />
+    <content />
+    <contentSize />
+    <totalRange>
+      <min uom="" />
+      <max uom="" />
+      <minTime />
+      <maxTime />
+    </totalRange>
+    <customElement uid="">
+      <name />
+      <creationTime />
+      <type />
+      <tag />
+      <content />
+      <contentSize />
+      <sequence />
+      <lastChanged />
+      <range>
+        <min uom="" />
+        <max uom="" />
+        <minTime />
+        <maxTime />
+      </range>
+    </customElement>
+    <commonData>
+      <sourceName />
+      <dTimCreation />
+      <dTimLastChange />
+      <itemState />
+      <serviceCategory />
+      <comments />
+      <acquisitionTimeZone dTim="" />
+      <defaultDatum uidRef="" />
+      <privateGroupOnly />
+      <extensionAny />
+      <extensionNameValue />
+    </commonData>
+    <customData />
+  </customObject>
+</customObjects>

@@ -1,0 +1,346 @@
+﻿<UserControl x:Class="ShellSquare.Witsml.Client.WITSMLControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ShellSquare.Witsml.Client"
+             xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="1900">
+    <UserControl.Resources>
+
+        <Style x:Key="ButtonFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <LinearGradientBrush x:Key="ButtonNormalBackground" EndPoint="0,1" StartPoint="0,0">
+            <GradientStop Color="#F3F3F3" Offset="0"/>
+            <GradientStop Color="#EBEBEB" Offset="0.5"/>
+            <GradientStop Color="#DDDDDD" Offset="0.5"/>
+            <GradientStop Color="#CDCDCD" Offset="1"/>
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="ButtonNormalBorder" Color="#FF707070"/>
+        <Style x:Key="ToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
+            <Setter Property="Background" Value="{StaticResource ButtonNormalBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonNormalBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <Border x:Name="on" Width="72" Height="20" Background="#93a1b8" CornerRadius="0" Margin="10,0,0,0">
+                                <TextBlock x:Name="onText" FontWeight="Bold" Text="Xml View" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border x:Name="off" Width="72" Height="20" Background="#93a1b8" CornerRadius="0">
+                                <TextBlock x:Name="offText" FontWeight="Bold" Text="Tree View" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#354052"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter TargetName="on" Property="Background" Value="White"/>
+                                <Setter TargetName="onText" Property="Foreground" Value="#354052"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter TargetName="off" Property="Background" Value="white"/>
+                                <Setter TargetName="offText" Property="Foreground" Value="#354052"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <Style x:Key="ComboBoxDesign" TargetType="{x:Type ComboBox}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Grid.Column="2" Focusable="false" IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}" >
+                                <ToggleButton.Template>
+                                    <ControlTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="5*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border x:Name="Border"  Grid.ColumnSpan="2" CornerRadius="0" Background="White" BorderBrush="#354052" BorderThickness="1" />
+                                            <Border Grid.Column="0" CornerRadius="0,0,0,0"  Margin="1"  Background="White"  BorderBrush="#354052" BorderThickness="0,0,1,0" />
+                                            <Path x:Name="Arrow" Grid.Column="1"  Fill="#354052" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 4 4 L 8 0 Z"/>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="ToggleButton.IsMouseOver" Value="true">
+                                                <Setter TargetName="Border" Property="Background" Value="#354052" />
+                                                <Setter TargetName="Arrow" Property="Fill" Value="White" />
+                                            </Trigger>
+                                            <Trigger Property="ToggleButton.IsChecked" Value="true">
+                                                <Setter TargetName="Border" Property="Background" Value="#354052" />
+                                                <Setter TargetName="Arrow" Property="Fill" Value="White" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter Margin="7,3,3,3" Name="ContentSite" VerticalAlignment="Center" IsHitTestVisible="False"  Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
+                            <TextBox x:Name="PART_EditableTextBox" Visibility="Hidden" IsReadOnly="{TemplateBinding IsReadOnly}"/>
+                            <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True"  Focusable="False" PopupAnimation="Slide">
+                                <Grid Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder" Background="White" BorderBrush="#354052" BorderThickness="1" />
+                                    <ScrollViewer Padding="5" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid Background="#FFFFFF">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="10" />
+        </Grid.RowDefinitions>
+
+        <Border Background="#ECF1F5" Grid.ColumnSpan="2" Grid.RowSpan="2" Margin="0, -1,0,0" BorderBrush="#354052" BorderThickness="0,2,0,0" />
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,6,0,0" Height="22" VerticalAlignment="Top">
+            <Border Margin="5,0,0,0" Background="White"  BorderBrush="#999" BorderThickness="1">
+                <TextBox Margin="3,0,3,0" FontSize="12" VerticalAlignment="Center" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Padding="5,0,5,0" Width="400" x:Name="ServerUrl" Text="http://localhost/WITSMLStore/WITSML" />
+            </Border>
+
+            <Button Margin="5,0,0,0" Style="{StaticResource btnGreen}" Width="80" x:Name="ChooseButton" Click="ChooseButton_Click">Choose...</Button>
+
+            <TextBlock Foreground="#666" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,5,0">User</TextBlock>
+
+            <Border Background="White" BorderBrush="#999" BorderThickness="1">
+                <TextBox Margin="3,0,3,0" FontSize="12" VerticalAlignment="Center" BorderBrush="Transparent" BorderThickness="0" Padding="5,0,5,0" Width="120"   Text="" x:Name="UserName"/>
+            </Border>
+            <TextBlock Foreground="#666" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,5,0">Password</TextBlock>
+            <Border Background="White"  BorderBrush="#999" BorderThickness="1">
+                <PasswordBox Margin="3,0,3,0" FontSize="12" VerticalAlignment="Center" Password="" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Padding="5,0,5,2" Width="120"  x:Name="Password"/>
+            </Border>
+
+            <Button Margin="5,0,0,0" Width="80" Style="{StaticResource btnGreen}" x:Name="Connect" Click="Connect_Click">Connect</Button>
+
+            <TextBlock Foreground="#666" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,5,0">WITSML Version:</TextBlock>
+            <TextBlock Foreground="#666" FontWeight="Bold" VerticalAlignment="Center" x:Name="Version">Unknown</TextBlock>
+        </StackPanel>
+
+        <StackPanel   Orientation="Horizontal" Grid.Row="1" Height="22" VerticalAlignment="Top" Margin="0,5,0,0">
+            <Border Margin="5,0,0,0" Background="White" BorderBrush="#999" BorderThickness="1">
+                <TextBox Margin="3,0,3,0" FontSize="12" VerticalAlignment="Center" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Padding="5,0,5,0" Width="180" x:Name="Options"/>
+            </Border>
+            <Button Margin="5,0,0,0" Width="80" Style="{StaticResource btnGreen}" x:Name="GetOption" Click="GetOption_Click">Options...</Button>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Margin="20,0,0,0" Width="120" Style="{StaticResource btnGreen}" x:Name="GetData" Click="GetData_Click">Get</Button>
+                <Button Margin="5,0,0,0" Width="120" Style="{StaticResource btnGreen}" x:Name="Add" Click="Add_Click">Add</Button>
+                <Button Margin="5,0,0,0" Width="120" Style="{StaticResource btnGreen}" x:Name="Update" Click="Update_Click">Update</Button>
+                <Button Margin="5,0,0,0" Width="120" Style="{StaticResource btnGreen}" x:Name="Delete" Click="Delete_Click">Delete</Button>
+                <CheckBox Margin="5,0,0,0" Foreground="#666" FontWeight="Bold" IsChecked="true" Content="Enable TreeView" VerticalAlignment="Center" VerticalContentAlignment="Center" Name="EnableTree" Click="EnableTree_Click"  />
+            </StackPanel>
+        </StackPanel>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="4*"/>
+            </Grid.ColumnDefinitions>
+            <Border Margin="5,0,5,0" Grid.Column="0" Background="#354052"  >
+                <Grid Margin="0,5,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Margin="5,0,0,0" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Foreground="#FFF" Margin="0,0,0,5" FontWeight="Bold" FontSize="12" VerticalAlignment="Center">Query Design</TextBlock>
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" Margin="0,-5,0,0">
+                            <ComboBox FontSize="12" Style="{StaticResource ComboBoxDesign}"  x:Name="Templates" Height="30" Width="150" VerticalAlignment="Stretch" SelectedIndex="0"   SelectionChanged="Templates_SelectionChanged" >
+
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Grid.Row="1" Margin="0,0,0,0" BorderThickness="1,0,1,1" BorderBrush="#6F7E95">
+                        <DataGrid Background="White"    x:Name="requestGrid" SelectionUnit="Cell" HeadersVisibility="Column" BorderThickness="0,1,0,0" AutoGenerateColumns="False"
+                                   CanUserAddRows="False" PreviewMouseLeftButtonDown="requestGrid_PreviewMouseLeftButtonDown" FontSize="12">
+
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Select" x:Name="RequestGridSelect" Click="RequestGridSelect_Click"  />
+                                    <MenuItem Header="Deselect" x:Name="RequestGridDeselect" Click="RequestGridDeselect_Click" />
+                                    <MenuItem Header="Select All" x:Name="RequestGridSelectAll" Click="RequestGridSelectAll_Click" />
+                                    <MenuItem Header="Deselect All" x:Name="RequestGridDeselectAll" Click="RequestGridDeselectAll_Click" />
+                                    <Separator />
+                                    <MenuItem Header="Clear" x:Name="ClearAll" Click="ClearAll_Click" />
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding type}" Value="1">
+                                            <Setter Property="FontWeight" Value="bold"></Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding type}" Value="2">
+                                            <Setter Property="Foreground" Value="Gray"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}">
+                                    <Style.Triggers>
+                                        <Trigger Property="DataGridCell.IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#CCDAFF" />
+                                            <Setter Property="Foreground" Value="#000000" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.CellStyle>
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding Path=select}"  HorizontalAlignment="Center" VerticalAlignment="Center"  Checked="RequestGridSelect_Click" Unchecked="RequestGridDeselect_Click"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Binding="{Binding level}" Width="5" Visibility="Collapsed"/>
+                                <DataGridTextColumn Binding="{Binding name}" Header="Name" Width="*" IsReadOnly="True" />
+                                <DataGridTemplateColumn Header="Value" Width="1.5*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBox x:Name="ValueTextBox" BorderBrush="White" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Text="{Binding Path=value}" TextChanged="OnValueTextChanged">
+                                                <TextBox.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Select" x:Name="RequestGridSelect" Click="RequestGridSelect_Click"  />
+                                                        <MenuItem Header="Deselect" x:Name="RequestGridDeselect" Click="RequestGridDeselect_Click" />
+                                                        <MenuItem Header="Select All" x:Name="RequestGridSelectAll" Click="RequestGridSelectAll_Click" />
+                                                        <MenuItem Header="Deselect All" x:Name="RequestGridDeselectAll" Click="RequestGridDeselectAll_Click" />
+                                                        <Separator />
+                                                        <MenuItem Header="Clear" x:Name="ClearAll" Click="ClearAll_Click" />
+                                                    </ContextMenu>
+                                                </TextBox.ContextMenu>
+                                            </TextBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </Grid>
+            </Border>
+            <GridSplitter Width="5" />
+            <Border Grid.Column="1" Background="#354052" Margin="0,0,5,0" >
+                <Grid Margin="0,5,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3" />
+                        <RowDefinition Height="11"/>
+                        <RowDefinition Height="10.868"/>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Foreground="#FFF" FontWeight="Bold" FontSize="12" Margin="5,-3,0,4" VerticalAlignment="Center" Grid.RowSpan="2" Grid.Row="1">Request</TextBlock>
+
+                    <Border Grid.Row="3" Margin="0,0,0,0" BorderThickness="1" BorderBrush="#6F7E95" >
+                        <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit" Name="requestEditor" WordWrap="True"
+                                               HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" SyntaxHighlighting="XML"
+                                               TextChanged="OnRequestEditorTextChanged" FontSize="12" />
+                    </Border>
+
+                </Grid>
+            </Border>
+            <GridSplitter Grid.Column="1" Width="5" />
+            <Border Grid.Column="2" Margin="0,0,2,0" Background="#354052" Grid.ColumnSpan="2" >
+
+                <Grid Margin="0,5,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="2*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="12" Foreground="#FFF" FontWeight="Bold" Margin="5,-3,0,0" Grid.Column="0" VerticalAlignment="Center" Visibility="Collapsed" x:Name="TotalItems">Total Items:</TextBlock>
+                            <TextBlock FontSize="12" Foreground="#FFF"  Margin="5,-3,0,0" VerticalAlignment="Center" Visibility="Collapsed" x:Name="TotalItemCount"></TextBlock>
+                            <TextBlock FontSize="12" Foreground="#FFF" FontWeight="Bold" Margin="5,-3,0,0" Grid.Column="0" VerticalAlignment="Center">Response:</TextBlock>
+                            <TextBlock FontSize="12" Foreground="#FFF"  Margin="5,-3,0,0" VerticalAlignment="Center" x:Name="elapsedTime"></TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" FlowDirection="RightToLeft">
+
+                            <Border Margin="10,0,5,5" Background="White" VerticalAlignment="Center" BorderBrush="#999" BorderThickness="1">
+                                <TextBox x:Name="Search" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  FontSize="12" VerticalAlignment="Center" Height="22" 
+                                         
+                                         PreviewKeyUp="Search_PreviewKeyUp"
+                                         
+                                         BorderBrush="Transparent" BorderThickness="0" Padding="5,0,5,0" Width="160" />
+                            </Border>
+
+
+                            <TextBlock FontSize="12" Foreground="#FFF" FontWeight="Bold" Margin="5,0,0,5" VerticalAlignment="Center" >Search</TextBlock>
+                            <ToggleButton Margin="5,0,5,5" Style="{StaticResource ToggleButtonStyle}"  IsChecked="false" x:Name="XmlToggle" Click="XmlToggle_Click"   />
+                        </StackPanel>
+                    </Grid>
+                    <Border Grid.Row="1" Margin="0,0,0,0" BorderThickness="1" BorderBrush="#6F7E95">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="787*"/>
+                                <ColumnDefinition Width="159*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid x:Name="treeEditor" Grid.ColumnSpan="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="699*"/>
+                                    <ColumnDefinition Width="247*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <TreeView  Background="White" Grid.RowSpan="2" BorderThickness="0" x:Name="treeView" FontSize="12" Grid.ColumnSpan="2" />
+                                <DataGrid Grid.Row="1" BorderThickness="0,1,0,0" x:Name="logDataGrid" Visibility="Collapsed" FontSize="12" Grid.ColumnSpan="2" />
+                            </Grid>
+                            <avalonEdit:TextEditor Visibility="Hidden" xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit" Name="responceEditor" 
+                                                   HorizontalScrollBarVisibility="Disabled" WordWrap="True" VerticalScrollBarVisibility="Auto" SyntaxHighlighting="XML"
+                                                   FontSize="12" Grid.ColumnSpan="2"
+                                                   />
+                            <Controls:ProgressRing x:Name="ProgressDisplay" Visibility="Collapsed" Foreground="#6600FF00" IsActive="True" Margin="443,139,284.304,139" />
+
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Background="#354052" Grid.Row="3" BorderThickness="0" Margin="-1,2,0,-1" />
+    </Grid>
+</UserControl>

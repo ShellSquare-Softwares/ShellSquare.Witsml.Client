@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<toolErrorModels version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <toolErrorModel uid="">
+    <name />
+    <authorization>
+      <author />
+      <source />
+      <authority />
+      <status />
+      <version />
+      <comment />
+    </authorization>
+    <typeSurveyTool />
+    <operatingCondition uid="">
+      <parameter />
+      <min uom="" />
+      <max uom="" />
+      <value />
+      <extensionNameValue />
+    </operatingCondition>
+    <operatingInterval uid="">
+      <mode />
+      <start uom="" />
+      <end uom="" />
+      <speed uom="" />
+      <sampleRate uom="" />
+      <extensionNameValue />
+    </operatingInterval>
+    <modelParameters>
+      <misalignmentMode />
+      <gyroInitialization uom="" />
+      <gyroReinitializationDistance uom="" />
+      <switching />
+      <noiseReductionFactor />
+      <gyroRunningSpeed uom="" />
+    </modelParameters>
+    <useErrorTermSet uidRef="" />
+    <errorTermValue uid="">
+      <term uidRef="" />
+      <prop />
+      <bias />
+      <value uom="" />
+      <comment />
+      <extensionNameValue />
+    </errorTermValue>
+    <commonData>
+      <sourceName />
+      <dTimCreation />
+      <dTimLastChange />
+      <itemState />
+      <serviceCategory />
+      <comments />
+      <acquisitionTimeZone dTim="" />
+      <defaultDatum uidRef="" />
+      <privateGroupOnly />
+      <extensionAny />
+      <extensionNameValue />
+    </commonData>
+    <customData />
+  </toolErrorModel>
+</toolErrorModels>

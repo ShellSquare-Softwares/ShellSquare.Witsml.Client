@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<risks version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <risk uid="">
+    <name />
+    <subCategory />
+    <dTimStart />
+    <dTimEnd />
+  </risk>
+</risks>

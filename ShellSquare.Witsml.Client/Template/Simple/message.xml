@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<messages version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <message uid="">
+    <name />
+    <commonData>
+      <serviceCategory />
+    </commonData>
+  </message>
+</messages>

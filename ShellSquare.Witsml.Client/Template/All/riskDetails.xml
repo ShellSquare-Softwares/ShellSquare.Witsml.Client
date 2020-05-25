@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<risks version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <risk uidWell="" uidWellbore="" uid="">
+    <nameWell />
+    <nameWellbore />
+    <name />
+    <objectReference object="" uidRef="" />
+    <type />
+    <category />
+    <subCategory />
+    <extendCategory />
+    <affectedPersonnel />
+    <dTimStart />
+    <dTimEnd />
+    <mdHoleStart uom="" datum="" />
+    <mdHoleEnd uom="" datum="" />
+    <tvdHoleStart uom="" datum="" />
+    <tvdHoleEnd uom="" datum="" />
+    <mdBitStart uom="" datum="" />
+    <mdBitEnd uom="" datum="" />
+    <diaHole uom="" />
+    <severityLevel />
+    <probabilityLevel />
+    <summary />
+    <details />
+    <identification />
+    <contingency />
+    <mitigation />
+    <commonData>
+      <sourceName />
+      <dTimCreation />
+      <dTimLastChange />
+      <itemState />
+      <serviceCategory />
+      <comments />
+      <acquisitionTimeZone dTim="" />
+      <defaultDatum uidRef="" />
+      <privateGroupOnly />
+      <extensionAny />
+      <extensionNameValue />
+    </commonData>
+    <customData />
+  </risk>
+</risks>

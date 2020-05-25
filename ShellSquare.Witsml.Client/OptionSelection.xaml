@@ -1,0 +1,31 @@
+﻿<Window x:Class="ShellSquare.Witsml.Client.OptionSelection"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ShellSquare.Witsml.Client"
+        mc:Ignorable="d"
+        ShowInTaskbar="false"
+        Title="Option Selection" Height="180" Width="350" WindowState="Normal" WindowStartupLocation="CenterScreen">
+    <StackPanel>
+        <StackPanel Margin="10,15,10,5" VerticalAlignment="Center" Orientation="Horizontal">
+            <CheckBox Margin="10,0,10,0" Name="DataVersion" VerticalAlignment="Center"  />
+            <TextBlock VerticalAlignment="Center" >Data Version</TextBlock>
+            <ComboBox Name="DataversionSelection" SelectedIndex="0" Margin="30,0,10,0" Width="120">
+                <ComboBoxItem>1.4.1.1</ComboBoxItem>
+            </ComboBox>
+        </StackPanel>
+        <StackPanel Margin="10,10,10,5" VerticalAlignment="Center" Orientation="Horizontal">
+            <CheckBox Margin="10,0,10,0" Name="ReturnElement" VerticalAlignment="Center" />
+            <TextBlock VerticalAlignment="Center" >Return Elements</TextBlock>
+            <ComboBox Name="ReturnElementSelection" SelectedIndex="0" Margin="10,0,10,0" Width="120">
+                <ComboBoxItem>default</ComboBoxItem>
+                <ComboBoxItem>all</ComboBoxItem>
+                <ComboBoxItem>id-only</ComboBoxItem>
+                <ComboBoxItem>header-only</ComboBoxItem>
+                <ComboBoxItem>data-only</ComboBoxItem>
+            </ComboBox>
+        </StackPanel>
+        <Button HorizontalAlignment="Right" Margin="0,10,20,0" Width="80" Name="DoneButton" Click="DoneButton_Click">Done</Button>
+    </StackPanel>
+</Window>

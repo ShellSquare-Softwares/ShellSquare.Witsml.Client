@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<mnemonicSets version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <mnemonicSet uid="">
+    <mnemonics>
+      <mnemonic index="" sourceName="" indexType="" dataGroup="" logName="" mnemAlias="" uom="" unitType="" classWitsml="" dataGroupTarget="" mnemonicTarget="" mnemAliasTarget="" uomTarget="" mnemonicPri="" warningLow="" warningHigh="" warningTime="" alarmLow="" alarmHigh="" alarmTime="" scaleLow="" scaleHigh="" spikeLow="" spikeHigh="" spikeEnable="" isLogarithmic="" description="" logDepth="" logDateTime="" logTimeInterval="" logDepthInterval="" logDataType="" logDataSize="" logDoResCalc="" logRecordType="" logHistoryLength="" opcDa="" opcDataType="" opcDaInterval="" scaleType="" lineStyle="" lineColor="" serviceCompany="" serviceGroup="" tool="" isGMMnemonic="" />
+    </mnemonics>
+    <description />
+    <shortDescription />
+    <custom1 />
+    <custom2 />
+    <custom3 />
+    <custom4 />
+    <custom5 />
+    <commonData>
+      <sourceName />
+      <dTimCreation />
+      <dTimLastChange />
+      <itemState />
+      <serviceCategory />
+      <comments />
+      <acquisitionTimeZone dTim="" />
+      <defaultDatum uidRef="" />
+      <privateGroupOnly />
+      <extensionAny />
+      <extensionNameValue />
+    </commonData>
+    <customData />
+  </mnemonicSet>
+</mnemonicSets>

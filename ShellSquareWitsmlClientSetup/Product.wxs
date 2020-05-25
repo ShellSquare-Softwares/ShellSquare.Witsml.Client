@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+  xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+	<Product Id="A76F6DB2-9DF6-4CFB-8C3A-72D1D9B0F7BD" Name="ShellSquare Witsml Client" Language="1033" Version="1.0.0.1" Manufacturer="Shellsquare Softwares" UpgradeCode="d8e4d41f-273f-4068-8b2d-d6e5ca8bc20f">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <Media Cabinet="ShellSquareWitsmlClient.cab" Id="1" EmbedCab="yes" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <UI>
+      <UIRef Id="WixUI_InstallDir" />
+
+      <!-- Skip license dialog -->
+      <Publish Dialog="WelcomeDlg"
+               Control="Next"
+               Event="NewDialog"
+               Value="InstallDirDlg"
+               Order="2">1</Publish>
+      <Publish Dialog="InstallDirDlg"
+               Control="Back"
+               Event="NewDialog"
+               Value="WelcomeDlg"
+               Order="2">1</Publish>
+    </UI>
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Feature Id="ProductFeature" Title="Witsml Client" Level="1">
+      <ComponentGroupRef Id="MainComponents" />
+      <ComponentGroupRef Id="ConfigurationComponents" />
+      <ComponentGroupRef Id="TemplateComponents" />
+      <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="ApplicationShortcutDesktop" />
+    </Feature>
+
+    <Icon Id="AppIcon_ico" SourceFile="logo.ico"/>
+
+  </Product>
+
+  <Fragment>
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="e3ad9820-69ab-4800-83bf-a4339467e110">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                Name="Witsml Client"
+                Description="Witsml Client utility"
+                Target="[#Witsml_Client_exe]"
+                WorkingDirectory="PRODUCTNAMEDIR"
+                Icon="AppIcon_ico" />
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\Microsoft\Witsml Client" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+
+  <Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="DesktopFolder" Name="Desktop">
+        <Component Id="ApplicationShortcutDesktop" Guid="*">
+          <Shortcut Id="ApplicationDesktopShortcut"
+              Name="ShellSquare Witsml Client"
+              Description="ShellSquare Witsml Client"
+              Target="[WITSMLCLIENT]ShellSquare.Witsml.Client.exe"
+              WorkingDirectory="WITSMLCLIENT"/>
+          <RemoveFolder Id="DesktopFolder" On="uninstall"/>
+          <RegistryValue
+              Root="HKCU"
+              Key="Software/MyAppName"
+              Name="installed"
+              Type="integer"
+              Value="1"
+              KeyPath="yes"/>
+        </Component>
+      </Directory>
+
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="ShellSquare Softwares">
+          <Directory Id="WITSMLCLIENT" Name="Witsml Client">
+            <Directory Id="TEMPLATE" Name="Template">
+              <Directory Id="ALLT" Name="All"/>
+              <Directory Id="IDS" Name="Ids"/>
+              <Directory Id="SIMPLE" Name="Simple"/>
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+
+      <Directory Id="ProgramMenuFolder" >
+        <Directory Id="ApplicationProgramsFolder" Name="ShellSquare Softwares"/>
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="MainComponents" Directory="WITSMLCLIENT">
+      <Component Id="ProductComponent" Guid="c59e861b-750c-4e74-8aba-8db7b726d298">
+        <File Id="ControlzEx.dll" Source="..\ShellSquare.Witsml.Client\bin\$(var.BUILD)\ControlzEx.dll" />
+        <File Id="ICSharpCode.AvalonEdit.dll" Source="..\ShellSquare.Witsml.Client\bin\$(var.BUILD)\ICSharpCode.AvalonEdit.dll" />
+        <File Id="MahApps.Metro.dll" Source="..\ShellSquare.Witsml.Client\bin\$(var.BUILD)\MahApps.Metro.dll" />
+        <File Id="System.Windows.Interactivity.dll" Source="..\ShellSquare.Witsml.Client\bin\$(var.BUILD)\System.Windows.Interactivity.dll" />
+        <File Id="Newtonsoft.Json.dll" Source="..\ShellSquare.Witsml.Client\bin\$(var.BUILD)\Newtonsoft.Json.dll" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="ConfigurationComponents" Directory="WITSMLCLIENT">
+      <Component Id="ConfigurationComponent" Guid="7393ea43-a0cf-42e4-9f98-b35f46098bdf">
+        <File Id="Witsml_Client_exe" Source="..\ShellSquare.Witsml.Client\bin\$(var.BUILD)\ShellSquare.Witsml.Client.exe" />
+        <File Id="ShellSquare.Witsml.Client.exe.config" Source="..\ShellSquare.Witsml.Client\bin\$(var.BUILD)\ShellSquare.Witsml.Client.exe.config" />
+        <File Id="ShellSquare.Witsml.Client.pdb" Source="..\ShellSquare.Witsml.Client\bin\$(var.BUILD)\ShellSquare.Witsml.Client.pdb" />
+        <File Id="Configuration.xml" Source="..\ShellSquare.Witsml.Client\bin\$(var.BUILD)\Configuration.xml" />
+      </Component>
+    </ComponentGroup>
+    <ComponentGroup Id="TemplateComponents">
+      <Component Id="TemplateComponentAll" Directory="ALLT" Guid="2a68297f-c0ee-4e85-a42b-f8a07f3b59c0">
+        <File Id="attachmentDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\attachmentDetails.xml" />
+        <File Id="bhaRunDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\bhaRunDetails.xml" />
+        <File Id="cementJobDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\cementJobDetails.xml" />
+        <File Id="changeLogDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\changeLogDetails.xml" />
+        <File Id="convCoreDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\convCoreDetails.xml" />
+        <File Id="coordinateReferenceDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\coordinateReferenceDetails.xml" />
+        <File Id="customObjectDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\customObjectDetails.xml" />
+        <File Id="drillReportDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\drillReportDetails.xml" />
+        <File Id="fluidsReportDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\fluidsReportDetails.xml" />
+        <File Id="formationMarkerDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\formationMarkerDetails.xml" />
+        <File Id="LogDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\LogDetails.xml" />
+        <File Id="messageDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\messageDetails.xml" />
+        <File Id="mnemonicSetDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\mnemonicSetDetails.xml" />
+        <File Id="mudLogDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\mudLogDetails.xml" />
+        <File Id="objectGroupDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\objectGroupDetails.xml" />
+        <File Id="opsReportDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\opsReportDetails.xml" />
+        <File Id="pressureTestPlanDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\pressureTestPlanDetails.xml" />
+        <File Id="rigDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\rigDetails.xml" />
+        <File Id="riskDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\riskDetails.xml" />
+        <File Id="sideWallCoreDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\sideWallCoreDetails.xml" />
+        <File Id="stimJobDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\stimJobDetails.xml" />
+        <File Id="surveyProgramDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\surveyProgramDetails.xml" />
+        <File Id="targetDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\targetDetails.xml" />
+        <File Id="toolErrorModelDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\toolErrorModelDetails.xml" />
+        <File Id="toolErrorTermSetDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\toolErrorTermSetDetails.xml" />
+        <File Id="trajectoryDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\trajectoryDetails.xml" />
+        <File Id="tubularDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\tubularDetails.xml" />
+        <File Id="wbGeometryDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\wbGeometryDetails.xml" />
+        <File Id="WellboreDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\WellboreDetails.xml" />
+        <File Id="WellDetails.xml" Source="..\ShellSquare.Witsml.Client\Template\All\WellDetails.xml" />
+        
+      </Component>
+      <Component Id="TemplateComponentIds" Directory="IDS" Guid="49EEC743-64F4-4654-92CB-ADC2AA1B5DBA">
+        <File Id="attachmentId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\attachmentId.xml" />
+        <File Id="bhaRunId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\bhaRunId.xml" />
+        <File Id="cementJobId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\cementJobId.xml" />
+        <File Id="changeLogId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\changeLogId.xml" />
+        <File Id="convCoreId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\convCoreId.xml" />
+        <File Id="coordinateReferenceId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\coordinateReferenceId.xml" />
+        <File Id="customObjectId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\customObjectId.xml" />
+        <File Id="drillReportId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\drillReportId.xml" />
+        <File Id="fluidsReportId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\fluidsReportId.xml" />
+        <File Id="formationMarkerId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\formationMarkerId.xml" />
+        <File Id="LogId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\LogId.xml" />
+        <File Id="messageId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\messageId.xml" />
+        <File Id="mnemonicSetId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\mnemonicSetId.xml" />
+        <File Id="mudLogId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\mudLogId.xml" />
+        <File Id="objectGroupId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\objectGroupId.xml" />
+        <File Id="opsReportId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\opsReportId.xml" />
+        <File Id="pressureTestPlanId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\pressureTestPlanId.xml" />
+        <File Id="rigId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\rigId.xml" />
+        <File Id="riskId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\riskId.xml" />
+        <File Id="sideWallCoreId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\sideWallCoreId.xml" />
+        <File Id="stimJobId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\stimJobId.xml" />
+        <File Id="surveyProgramId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\surveyProgramId.xml" />
+        <File Id="targetId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\targetId.xml" />
+        <File Id="toolErrorModelId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\toolErrorModelId.xml" />
+        <File Id="toolErrorTermSetId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\toolErrorTermSetId.xml" />
+        <File Id="trajectoryId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\trajectoryId.xml" />
+        <File Id="tubularId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\tubularId.xml" />
+        <File Id="wbGeometryId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\wbGeometryId.xml" />
+        <File Id="WellboreId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\WellboreId.xml" />
+        <File Id="WellId.xml" Source="..\ShellSquare.Witsml.Client\Template\Ids\WellId.xml" />
+      </Component>
+      <Component Id="TemplateComponentSimple" Directory="SIMPLE" Guid="7FD3EC9F-F248-4906-BFC5-12F8686976AA">
+        <File Id="attachment.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\attachment.xml" />
+        <File Id="bhaRun.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\bhaRun.xml" />
+        <File Id="cementJob.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\cementJob.xml" />
+        <File Id="changeLog.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\changeLog.xml" />
+        <File Id="convCore.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\convCore.xml" />
+        <File Id="coordinateReference.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\coordinateReference.xml" />
+        <File Id="customObject.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\customObject.xml" />
+        <File Id="drillReport.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\drillReport.xml" />
+        <File Id="fluidsReport.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\fluidsReport.xml" />
+        <File Id="formationMarker.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\formationMarker.xml" />
+        <File Id="Log.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\Log.xml" />
+        <File Id="message.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\message.xml" />
+        <File Id="mnemonicSet.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\mnemonicSet.xml" />
+        <File Id="mudLog.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\mudLog.xml" />
+        <File Id="objectGroup.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\objectGroup.xml" />
+        <File Id="opsReport.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\opsReport.xml" />
+        <File Id="pressureTestPlan.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\pressureTestPlan.xml" />
+        <File Id="rig.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\rig.xml" />
+        <File Id="risk.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\risk.xml" />
+        <File Id="sideWallCore.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\sideWallCore.xml" />
+        <File Id="stimJob.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\stimJob.xml" />
+        <File Id="surveyProgram.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\surveyProgram.xml" />
+        <File Id="target.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\target.xml" />
+        <File Id="toolErrorModel.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\toolErrorModel.xml" />
+        <File Id="toolErrorTermSet.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\toolErrorTermSet.xml" />
+        <File Id="trajectory.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\trajectory.xml" />
+        <File Id="tubular.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\tubular.xml" />
+        <File Id="wbGeometry.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\wbGeometry.xml" />
+        <File Id="Well.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\Well.xml" />
+        <File Id="Wellbore.xml" Source="..\ShellSquare.Witsml.Client\Template\Simple\Wellbore.xml" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

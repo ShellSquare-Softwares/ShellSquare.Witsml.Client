@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<changeLogs version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <changeLog uidWell="" uidWellbore="" uidObject="" uid="">
+    <nameWell />
+    <nameWellbore />
+    <nameObject />
+    <objectType />
+    <sourceName />
+    <lastChangeType />
+    <lastChangeInfo />
+    <changeHistory uid="">
+      <dTimChange />
+      <changeType />
+      <objectGrowingState />
+      <updatedHeader />
+      <changeInfo />
+      <startIndex uom="" />
+      <endIndex uom="" />
+      <startDateTimeIndex />
+      <endDateTimeIndex />
+      <mnemonics />
+      <extensionNameValue />
+    </changeHistory>
+    <commonData>
+      <sourceName />
+      <dTimCreation />
+      <dTimLastChange />
+      <itemState />
+      <serviceCategory />
+      <comments />
+      <acquisitionTimeZone dTim="" />
+      <defaultDatum uidRef="" />
+      <privateGroupOnly />
+      <extensionNameValue />
+    </commonData>
+    <customData />
+  </changeLog>
+</changeLogs>
