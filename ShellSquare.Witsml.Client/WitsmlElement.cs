@@ -15,7 +15,7 @@ namespace ShellSquare.Witsml.Client
         public bool IsRequired { get; set; }
         public int Level { get; set; }
         public string Name { get; set; }
-        public string Value { get; set; }
+        public string Value { get; set; } = "";
         public List<string> Restrictions { get; private set; } = new List<string>();
 
         public WitsmlElement DeepCopy()

@@ -233,10 +233,11 @@
                                 <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox IsChecked="{Binding Path=Selected}"  HorizontalAlignment="Center" VerticalAlignment="Center"  />
+                                            <CheckBox IsChecked="{Binding Path=Selected}" Click="CheckBox_Click" Tag="{Binding}"  HorizontalAlignment="Center" VerticalAlignment="Center"  />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
+
 
                                 <DataGridTextColumn Binding="{Binding DisplayName}" Header="Name" Width="*" IsReadOnly="True" />
                                 <DataGridTemplateColumn Header="Value" Width="1.5*">
@@ -248,7 +249,9 @@
                                                     <ColumnDefinition Width="auto"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <TextBox x:Name="ValueTextBox" BorderBrush="White" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Text="{Binding Path=Value}" Tag="{Binding}" TextChanged="OnValueTextChanged">
+                                                <TextBox x:Name="ValueTextBox" BorderBrush="White" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Text="{Binding Path=Value}" Tag="{Binding}"
+                                                         GotFocus="ValueTextBox_GotFocus" LostFocus="ValueTextBox_LostFocus"
+                                                         TextChanged="OnValueTextChanged">
                                                     <TextBox.ContextMenu>
                                                         <ContextMenu>
                                                             <MenuItem Header="Select" x:Name="RequestGridSelect"  Click="RequestGridSelect_Click" />

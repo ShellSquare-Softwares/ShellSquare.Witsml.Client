@@ -29,19 +29,17 @@ namespace ShellSquare.Witsml.Client
     /// </summary>
     public partial class WITSMLControl : UserControl
     {
+        private DispatcherTimer m_DelayFlagUpdate;
         private DispatcherTimer m_RequestEditorChangeMonitor;
         private OptionSelection M_optionSelection;
         private TabHeaderControl m_TabHeader;
-        private bool m_LoadRequestGrid = false;
-        private bool m_LoadRequestEditor = false;
-        private string m_RequestId = "";
+        private bool m_ProgrammaticallyChanging = false;
 
         public WITSMLControl(TabHeaderControl tabHeader)
         {
             m_TabHeader = tabHeader;
             InitializeComponent();
             LoadPreference();
-
             LoadTemplateList();
         }
 
@@ -67,24 +65,18 @@ namespace ShellSquare.Witsml.Client
 
         private void FreshLoad()
         {
-            m_LoadRequestGrid = false;
-            m_LoadRequestEditor = false;
             var template = (string)Templates.SelectedValue;
-            XmlDocument document = new XmlDocument();
             try
             {
-
+                m_ProgrammaticallyChanging = true;
                 requestGrid.ItemsSource = LoadFromSchema(template.ToLower());
                 requestEditor.Text = RequestGridToXml();
-
+                m_ProgrammaticallyChanging = false;
             }
             catch (Exception ex)
             {
                 DisplayError($"Failed with the message: {ex.Message}");
             }
-
-            m_LoadRequestGrid = true;
-            m_LoadRequestEditor = true;
         }
 
         private List<GridNode> LoadFromSchema(string objextName)
@@ -107,7 +99,7 @@ namespace ShellSquare.Witsml.Client
                 }
             }
 
-            if(tempParent.Children.Count > 0)
+            if (tempParent.Children.Count > 0)
             {
                 WitsmlElementTree.Root = tempParent.Children[0];
                 WitsmlElementTree.Root.Namespace = GetNameSpace();
@@ -129,8 +121,114 @@ namespace ShellSquare.Witsml.Client
 
             return nodes;
         }
+        private string RequestGridToXml()
+        {
+            XDocument document = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
+
+            if (WitsmlElementTree.Root != null)
+            {
+                document.Add(WitsmlElementTree.Root.ToXElement());
+                document = ApplyRootAttribute(document);
+            }
+
+            string result = "";
+            using (var writer = new StringWriterWithEncoding(Encoding.UTF8))
+            {
+                var settings = new XmlWriterSettings()
+                {
+                    Indent = true
+                };
+
+                using (var xw = XmlWriter.Create(writer, settings))
+                {
+                    document.WriteTo(xw);
+                    xw.Flush();
+
+                    result = writer.ToString();
+                }
+            }
+
+            return result;
+        }
+        private List<GridNode> RequestXmlToGrid(string request)
+        {
+            WitsmlElementTree tempParent = new WitsmlElementTree(null);
+
+            XElement element = XElement.Parse(request);
+            List<GridNode> result = ParseRequest(element, tempParent, "");
+
+            if (tempParent.Children.Count > 0)
+            {
+                WitsmlElementTree.Root = tempParent.Children[0];
+                WitsmlElementTree.Root.Namespace = GetNameSpace();
+            }
+            else
+            {
+                WitsmlElementTree.Root = null;
+            }
+
+            return result;
+        }
+        private List<GridNode> ParseRequest(XElement element, WitsmlElementTree parent, string path, int level = 0)
+        {
+            List<GridNode> result = new List<GridNode>();
+
+            string name = element.Name.LocalName.ToString();
+            string newPath = $"{path}\\{name}";
+
+            if (!WitsmlElementStore.Elements.TryGetValue(newPath, out WitsmlElement w))
+            {
+                return result;
+            }
+            else
+            {
+                w = w.DeepCopy();
+            }
+
+            if (element.HasElements == false)
+            {
+                if (element.Value != "")
+                {
+                    w.Value = element.Value;
+                }
+            }
+
+            w.Selected = true;
+
+            GridNode node = new GridNode(w);
+            result.Add(node);
+
+            WitsmlElementTree child = new WitsmlElementTree(w);
+            parent.Children.Add(child);
+
+            if (level > 0)
+            {
+                foreach (var item in element.Attributes())
+                {
+                    var attrPath = $"{newPath}\\@{item.Name}";
+                    if (WitsmlElementStore.Elements.TryGetValue(attrPath, out w))
+                    {
+                        w = w.DeepCopy();
+                        w.Selected = true;
+                        w.Value = item.Value;
+                        GridNode attribute = new GridNode(w);
+                        result.Add(attribute);
+                        child.Attributes.Add(w);
+                    }
+                }
+            }
 
 
+            foreach (var item in element.Elements())
+            {
+                int l = level + 1;
+                var r = ParseRequest(item, child, newPath, l);
+                result.AddRange(r);
+            }
+
+            return result;
+
+        }
         public static string PrettifyXML(string xml)
         {
             string result;
@@ -174,22 +272,16 @@ namespace ShellSquare.Witsml.Client
             return result;
         }
 
-
-        
         private void OnRequestEditorTextChanged(object sender, EventArgs e)
         {
-            if (m_LoadRequestGrid)
+            if (m_ProgrammaticallyChanging == false)
             {
-                lock (m_RequestId)
-                {
-                    m_RequestId = Guid.NewGuid().ToString();
-                }
-
+                m_ProgrammaticallyChanging = true;
                 if (m_RequestEditorChangeMonitor == null)
                 {
 
                     m_RequestEditorChangeMonitor = new DispatcherTimer();
-                    m_RequestEditorChangeMonitor.Interval = TimeSpan.FromMilliseconds(200);
+                    m_RequestEditorChangeMonitor.Interval = TimeSpan.FromMilliseconds(1000);
 
                     m_RequestEditorChangeMonitor.Tick += new EventHandler(this.HandleRequestEditorChange);
                 }
@@ -198,130 +290,75 @@ namespace ShellSquare.Witsml.Client
             }
         }
 
-
-        private async void HandleRequestEditorChange(object sender, EventArgs e)
+        private void HandleRequestEditorChange(object sender, EventArgs e)
         {
             var timer = sender as DispatcherTimer;
             if (timer == null)
             {
                 return;
             }
-
+            timer.Stop();
 
             string request = requestEditor.Text;
-            var result = await Task.Run(() => ParseRequestText(request, m_RequestId));
+            LoadRequestGrid(request);
 
-            lock (m_RequestId)
+            if(request == requestEditor.Text)
             {
-                if (result.Item1 == m_RequestId && result.Item3 == null)
-                {
-                    requestGrid.ItemsSource = result.Item2;
-                }
-            }
-
-
-            // The timer must be stopped! We want to act only once per keystroke.
-            timer.Stop();
-        }
-
-        private (string, List<GridNode>, Exception) ParseRequestText(string request, string requestid)
-        {
-            try
-            {
-                WitsmlElementTree tempParent = new WitsmlElementTree(null);
-
-                XElement element = XElement.Parse(request);
-                List<GridNode> result = ParseRequest(element, tempParent, "");
-
-                if(tempParent.Children.Count > 0)
-                {
-                    WitsmlElementTree.Root = tempParent.Children[0];
-                    WitsmlElementTree.Root.Namespace = GetNameSpace();
-                }
-                else
-                {
-                    WitsmlElementTree.Root = null;
-                }
-
-                return (requestid, result, null);
-            }
-            catch (Exception ex)
-            {
-                return (requestid, null, ex);
+                timer.Stop();
             }
         }
 
-       
 
-        private List<GridNode> ParseRequest(XElement element, WitsmlElementTree parent, string path, int level = 0)
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        private void ValueTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            List<GridNode> result = new List<GridNode>();
 
-            string name = element.Name.LocalName.ToString();
-            string newPath = $"{path}\\{name}";
+        }
 
-            if (!WitsmlElementStore.Elements.TryGetValue(newPath, out WitsmlElement w))
-            {
-                return result;
-            }
-            else
-            {
-                w = w.DeepCopy();
-            }
-
-            if (element.HasElements == false)
-            {
-                w.Value = element.Value;
-            }
-
-            GridNode node = new GridNode(w);
-            result.Add(node);
-
-            WitsmlElementTree child = new WitsmlElementTree(w);
-            parent.Children.Add(child);
-
-            if (level > 0)
-            {
-                foreach (var item in element.Attributes())
-                {
-                    var attrPath = $"{newPath}\\@{item.Name}";
-                    if (WitsmlElementStore.Elements.TryGetValue(attrPath, out w))
-                    {
-                        w = w.DeepCopy();
-                        w.Value = item.Value;
-                        GridNode attribute = new GridNode(w);
-                        result.Add(attribute);
-                        parent.Attributes.Add(w);
-                    }
-                }
-            }
-
-            
-            foreach (var item in element.Elements())
-            {
-                int l = level + 1;
-                var r = ParseRequest(item, child, newPath, l);
-                result.AddRange(r);
-            }
-
-            return result;
+        private void ValueTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
 
         }
 
         private void OnValueTextChanged(object sender, TextChangedEventArgs e)
         {
-            var txt = sender as TextBox;
-            if (txt != null)
+            if (m_ProgrammaticallyChanging == false)
             {
-                var node = txt.Tag as GridNode;
-                if (node != null)
+                m_ProgrammaticallyChanging = true;
+                var txt = sender as TextBox;
+                if (txt != null)
                 {
-                    node.Value = txt.Text;
-
-                    LoadRequestEditorAsync();
+                    var node = txt.Tag as GridNode;
+                    if (node != null)
+                    {
+                        node.Value = txt.Text;
+                        node.Selected = true;
+                        LoadRequestEditor();
+                        if(node.Value != txt.Text)
+                        {
+                            node.Value = txt.Text;
+                            LoadRequestEditor();
+                        }
+                    }
                 }
             }
         }
+
 
 
         public void OnValueSelctionClicked(object sender, EventArgs e)
@@ -329,31 +366,61 @@ namespace ShellSquare.Witsml.Client
 
         }
 
-
-
-        private string RequestGridToXml()
+        private void LoadRequestGrid(string request)
         {
-            var nodes = requestGrid.ItemsSource as List<GridNode>;
-            XDocument document = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
-
-            if(WitsmlElementTree.Root != null)
+            try
             {
-                document.Add(WitsmlElementTree.Root.ToXElement());
-                document = ApplyRootAttribute(document);
+                requestGrid.ItemsSource = RequestXmlToGrid(request);
+            }
+            catch(Exception ex)
+            {
+                DisplayError($"Failed with the message: {ex.Message}");
             }
 
-            string result = "";
-            using (var writer = new StringWriterWithEncoding(Encoding.UTF8))
-            {
-                document.Save(writer);
-                result = writer.ToString();
-            }
-
-
-            return result;
-
+            ResetFlag();
         }
 
+        private void LoadRequestEditor()
+        {
+            try
+            {
+                requestEditor.Text = RequestGridToXml();
+            }
+            catch (Exception ex)
+            {
+                DisplayError($"Failed with the message: {ex.Message}");
+            }
+
+            ResetFlag();
+        }
+
+
+        private void ResetFlag()
+        {
+            if (m_DelayFlagUpdate == null)
+            {
+
+                m_DelayFlagUpdate = new DispatcherTimer();
+                m_DelayFlagUpdate.Interval = TimeSpan.FromMilliseconds(200);
+
+                m_DelayFlagUpdate.Tick += (s, e) => {
+                    var timer = s as DispatcherTimer;
+                    if (timer == null)
+                    {
+                        return;
+                    }
+                    timer.Stop();
+
+
+                    m_ProgrammaticallyChanging = false; 
+                
+                
+                };
+            }
+            m_DelayFlagUpdate.Stop();
+            m_DelayFlagUpdate.Start();
+
+        }
 
         private XDocument ApplyRootAttribute(XDocument document)
         {
@@ -372,73 +439,93 @@ namespace ShellSquare.Witsml.Client
 
         private void RequestGridSelect_Click(object sender, RoutedEventArgs e)
         {
-            if (requestGrid.SelectedItems.Count > 0)
+            if (m_ProgrammaticallyChanging == false)
             {
-                foreach (GridNode node in requestGrid.SelectedItems)
+                m_ProgrammaticallyChanging = true;
+                if (requestGrid.SelectedItems.Count > 0)
                 {
-                    node.Selected = true;
+                    foreach (GridNode node in requestGrid.SelectedItems)
+                    {
+                        node.Selected = true;
+                    }
                 }
-            }
 
-            LoadRequestEditorAsync();
+                LoadRequestEditor();
+            }
         }
 
         private void RequestGridDeselect_Click(object sender, RoutedEventArgs e)
         {
-            if (requestGrid.SelectedItems.Count > 0)
+            if (m_ProgrammaticallyChanging == false)
             {
-                foreach (GridNode node in requestGrid.SelectedItems)
+                m_ProgrammaticallyChanging = true;
+                if (requestGrid.SelectedItems.Count > 0)
                 {
-                    node.Selected = false;
+                    foreach (GridNode node in requestGrid.SelectedItems)
+                    {
+                        node.Selected = false;
+                    }
                 }
-            }
 
-            LoadRequestEditorAsync();
+                LoadRequestEditor();
+            }
         }
 
         private void RequestGridSelectAll_Click(object sender, RoutedEventArgs e)
         {
-            var nodes = requestGrid.ItemsSource as List<GridNode>;
-
-            if (nodes != null)
+            if (m_ProgrammaticallyChanging == false)
             {
-                foreach (var node in nodes)
-                {
-                    node.Selected = true;
-                }
-            }
+                m_ProgrammaticallyChanging = true;
+                var nodes = requestGrid.ItemsSource as List<GridNode>;
 
-            LoadRequestEditorAsync();
+                if (nodes != null)
+                {
+                    foreach (var node in nodes)
+                    {
+                        node.Selected = true;
+                    }
+                }
+
+                LoadRequestEditor();
+            }
         }
 
         private void RequestGridDeselectAll_Click(object sender, RoutedEventArgs e)
         {
-            var nodes = requestGrid.ItemsSource as List<GridNode>;
-
-            if (nodes != null)
+            if (m_ProgrammaticallyChanging == false)
             {
-                foreach (var node in nodes)
-                {
-                    node.Selected = false;
-                }
-            }
+                m_ProgrammaticallyChanging = true;
+                var nodes = requestGrid.ItemsSource as List<GridNode>;
 
-            LoadRequestEditorAsync();
+                if (nodes != null)
+                {
+                    foreach (var node in nodes)
+                    {
+                        node.Selected = false;
+                    }
+                }
+
+                LoadRequestEditor();
+            }
         }
 
         private void ClearAll_Click(object sender, RoutedEventArgs e)
         {
-            var nodes = requestGrid.ItemsSource as List<GridNode>;
-
-            if (nodes != null)
+            if (m_ProgrammaticallyChanging == false)
             {
-                foreach (var node in nodes)
-                {
-                    node.Value = null;
-                }
-            }
+                m_ProgrammaticallyChanging = true;
+                var nodes = requestGrid.ItemsSource as List<GridNode>;
 
-            LoadRequestEditorAsync();
+                if (nodes != null)
+                {
+                    foreach (var node in nodes)
+                    {
+                        node.Value = "";
+                    }
+                }
+
+                LoadRequestEditor();
+            }
         }
 
         private void Reload_Click(object sender, RoutedEventArgs e)
@@ -446,27 +533,39 @@ namespace ShellSquare.Witsml.Client
             FreshLoad();
         }
 
+        //private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    OnCheckBoxStateChnages(sender);
+        //}
 
+        //private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        //{
+        //    OnCheckBoxStateChnages(sender);
+        //}
 
-        private void LoadRequestEditorAsync()
+        //private void OnCheckBoxStateChnages(object sender)
+        //{
+            
+        //}
+
+        private void CheckBox_Click(object sender, RoutedEventArgs e)
         {
-            m_LoadRequestGrid = false;
-            m_LoadRequestEditor = false;
-            var template = (string)Templates.SelectedValue;
-            XmlDocument document = new XmlDocument();
-            try
+            if (m_ProgrammaticallyChanging == false)
             {
-                requestEditor.Text = RequestGridToXml();
-
+                m_ProgrammaticallyChanging = true;
+                var check = sender as CheckBox;
+                if (check != null)
+                {
+                    var node = check.Tag as GridNode;
+                    if (node != null)
+                    {
+                        node.Selected = check.IsChecked.Value;
+                        LoadRequestEditor();
+                    }
+                }
             }
-            catch (Exception ex)
-            {
-                DisplayError($"Failed with the message: {ex.Message}");
-            }
-
-            m_LoadRequestGrid = true;
-            m_LoadRequestEditor = true;
         }
+
 
 
 
@@ -491,6 +590,9 @@ namespace ShellSquare.Witsml.Client
             try
             {
                 ProgressDisplay.Visibility = Visibility.Visible;
+
+                logDataGrid.Visibility = Visibility.Collapsed;
+                Grid.SetRowSpan(treeView, 2);
 
                 TotalItems.Visibility = TotalItemCount.Visibility = Visibility.Collapsed;
                 ServicePointManager.ServerCertificateValidationCallback = (snder, cert, chain, error) => true;
@@ -532,7 +634,7 @@ namespace ShellSquare.Witsml.Client
                         witsmlNode.Value = doc.Root.Value;
                     }
 
-                    
+
                     var nodeList = new List<WitsmlNode>();
                     nodeList.Add(witsmlNode);
 
@@ -609,10 +711,25 @@ namespace ShellSquare.Witsml.Client
                             childNode.Attributes.Add(a);
                         }
 
-                        var children = GetChildren(childElement);
-                        childNode.Children.AddRange(children);
 
-                        result.Add(childNode);
+
+
+                        if (childElement.Name.LocalName.ToLower() == "logdata")
+                        {
+                            logDataGrid.Visibility = Visibility.Visible;
+                            Grid.SetRowSpan(treeView, 1);
+
+                            DataTable dt = new DataTable();
+                            DisplayLogdata(childElement, ref dt);
+                            logDataGrid.ItemsSource = new DataView(dt);
+                        }
+                        else
+                        {
+                            var children = GetChildren(childElement);
+                            childNode.Children.AddRange(children);
+
+                            result.Add(childNode);
+                        }
 
 
 
@@ -654,20 +771,7 @@ namespace ShellSquare.Witsml.Client
                         //};
 
 
-                        //if (childElement.Name.LocalName.ToLower() == "logdata")
-                        //{
-                        //    logDataGrid.Visibility = Visibility.Visible;
-                        //    Grid.SetRowSpan(treeView, 1);
 
-                        //    DataTable dt = new DataTable();
-                        //    DisplayLogdata(childTreeNode, childElement, ref dt);
-                        //    logDataGrid.ItemsSource = new DataView(dt);
-                        //}
-                        //else
-                        //{
-                        //    treeNode.Items.Add(childTreeNode);
-                        //    BuildNodes(childTreeNode, childElement, false);
-                        //}
                         break;
                     case XmlNodeType.Text:
                         //XText childText = child as XText;
@@ -679,7 +783,7 @@ namespace ShellSquare.Witsml.Client
             return result;
         }
 
-        private void DisplayLogdata(TreeViewItem treeNode, XElement element, ref DataTable dt)
+        private void DisplayLogdata(XElement element, ref DataTable dt)
         {
             foreach (XNode child in element.Nodes())
             {
@@ -687,7 +791,7 @@ namespace ShellSquare.Witsml.Client
                 {
                     case XmlNodeType.Element:
                         XElement childElement = child as XElement;
-                        DisplayLogdata(treeNode, childElement, ref dt);
+                        DisplayLogdata(childElement, ref dt);
                         break;
                     case XmlNodeType.Text:
                         XText childText = child as XText;
@@ -1014,6 +1118,10 @@ namespace ShellSquare.Witsml.Client
             try
             {
                 ProgressDisplay.Visibility = Visibility.Visible;
+
+                logDataGrid.Visibility = Visibility.Collapsed;
+                Grid.SetRowSpan(treeView, 2);
+
                 TotalItems.Visibility = TotalItemCount.Visibility = Visibility.Collapsed;
                 WITSMLDataHandler service = new WITSMLDataHandler(ServerUrl.Text, UserName.Text, Password.Password);
 
@@ -1337,12 +1445,11 @@ namespace ShellSquare.Witsml.Client
                     if (value != null)
                     {
                         gridNode.Value = value;
+                        gridNode.Selected = true;
                     }
 
                 }
             }
         }
-
-        
     }
 }

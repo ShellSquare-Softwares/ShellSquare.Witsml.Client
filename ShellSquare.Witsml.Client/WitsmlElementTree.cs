@@ -30,7 +30,16 @@ namespace ShellSquare.Witsml.Client
 
                 foreach (var item in Children)
                 {
-                    if (item.Element.Selected)
+                    if (item.Element.Selected )
+                    {
+                        return true;
+                    }
+                }
+
+
+                foreach (var item in Attributes)
+                {
+                    if (item.Selected)
                     {
                         return true;
                     }
@@ -67,8 +76,11 @@ namespace ShellSquare.Witsml.Client
 
             foreach (var a in Attributes)
             {
-                XAttribute at = new XAttribute(a.Name, a.Value ?? string.Empty);
-                element.Add(at);
+                if (a.Selected)
+                {
+                    XAttribute at = new XAttribute(a.Name, a.Value ?? string.Empty);
+                    element.Add(at);
+                }
             }
 
             foreach (var child in Children)
