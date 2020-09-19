@@ -75,7 +75,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ColorizeAvalonEdit.cs" />
     <Compile Include="GridNode.cs" />
     <Compile Include="OptionSelection.xaml.cs">
       <DependentUpon>OptionSelection.xaml</DependentUpon>
@@ -90,12 +89,6 @@
     </Compile>
     <Compile Include="TabItemHeader.xaml.cs">
       <DependentUpon>TabItemHeader.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TreeViewItemGridRow.xaml.cs">
-      <DependentUpon>TreeViewItemGridRow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TreeViewItemHeader.xaml.cs">
-      <DependentUpon>TreeViewItemHeader.xaml</DependentUpon>
     </Compile>
     <Compile Include="WITSMLControl.xaml.cs">
       <DependentUpon>WITSMLControl.xaml</DependentUpon>
@@ -132,14 +125,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="TabItemHeader.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="TreeViewItemGridRow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="TreeViewItemHeader.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
