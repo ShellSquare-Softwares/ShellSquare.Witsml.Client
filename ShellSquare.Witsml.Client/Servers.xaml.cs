@@ -56,8 +56,19 @@ namespace ShellSquare.Witsml.Client
                 break;
             }
 
+            string json = JsonConvert.SerializeObject(m_serverInfos);
+            Properties.Settings.Default.Servers = json;
+            Properties.Settings.Default.Save();
             this.Close();
+        }
 
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selecteditem = ServesGrid.SelectedItem;
+            if (selecteditem != null)
+            {
+                m_serverInfos.RemoveAt(ServesGrid.SelectedIndex);
+            }
         }
     }
 }

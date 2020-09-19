@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<coordinateReferenceSystems version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
-  <coordinateReferenceSystem uid="">
-    <name />
-    <geodeticCRS>
-      <nameCRS namingSystem="" code="" />
-    </geodeticCRS>
-  </coordinateReferenceSystem>
-</coordinateReferenceSystems>

@@ -8,7 +8,9 @@
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="1900">
     <UserControl.Resources>
-
+        <Style x:Key="TreeViewExpandAll" TargetType="{x:Type TreeViewItem}">
+            <Setter Property="IsExpanded" Value="True"/>
+        </Style>
         <Style x:Key="ButtonFocusVisual">
             <Setter Property="Control.Template">
                 <Setter.Value>
@@ -156,7 +158,7 @@
                 <Button Margin="5,0,0,0" Width="120" Style="{StaticResource btnGreen}" x:Name="Add" Click="Add_Click">Add</Button>
                 <Button Margin="5,0,0,0" Width="120" Style="{StaticResource btnGreen}" x:Name="Update" Click="Update_Click">Update</Button>
                 <Button Margin="5,0,0,0" Width="120" Style="{StaticResource btnGreen}" x:Name="Delete" Click="Delete_Click">Delete</Button>
-                <CheckBox Margin="5,0,0,0" Foreground="#666" FontWeight="Bold" IsChecked="true" Content="Enable TreeView" VerticalAlignment="Center" VerticalContentAlignment="Center" Name="EnableTree" Click="EnableTree_Click"  />
+                <CheckBox Margin="5,0,0,0" Foreground="#666" FontWeight="Bold" Content="Enable TreeView" VerticalAlignment="Center" VerticalContentAlignment="Center" Name="EnableTree" Click="EnableTree_Click" IsChecked="True"  />
             </StackPanel>
         </StackPanel>
 
@@ -186,28 +188,32 @@
                     </Grid>
 
                     <Border Grid.Row="1" Margin="0,0,0,0" BorderThickness="1,0,1,1" BorderBrush="#6F7E95">
-                        <DataGrid Background="White"    x:Name="requestGrid" SelectionUnit="Cell" HeadersVisibility="Column" BorderThickness="0,1,0,0" AutoGenerateColumns="False"
-                                   CanUserAddRows="False" PreviewMouseLeftButtonDown="requestGrid_PreviewMouseLeftButtonDown" FontSize="12">
+                        <DataGrid Background="White"    x:Name="requestGrid" SelectionUnit="FullRow" HeadersVisibility="Column" BorderThickness="0,1,0,0" AutoGenerateColumns="False"
+                                   CanUserAddRows="False" FontSize="12" >
 
                             <DataGrid.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Select" x:Name="RequestGridSelect" Click="RequestGridSelect_Click"  />
-                                    <MenuItem Header="Deselect" x:Name="RequestGridDeselect" Click="RequestGridDeselect_Click" />
+                                    <MenuItem Header="Select" x:Name="RequestGridSelect"  Click="RequestGridSelect_Click" />
+                                    <MenuItem Header="Deselect" x:Name="RequestGridDeselect" Click="RequestGridDeselect_Click"  />
                                     <MenuItem Header="Select All" x:Name="RequestGridSelectAll" Click="RequestGridSelectAll_Click" />
                                     <MenuItem Header="Deselect All" x:Name="RequestGridDeselectAll" Click="RequestGridDeselectAll_Click" />
                                     <Separator />
-                                    <MenuItem Header="Clear" x:Name="ClearAll" Click="ClearAll_Click" />
+                                    <MenuItem Header="Clear Values" x:Name="ClearAll" Click="ClearAll_Click"  />
+                                    <MenuItem Header="Reload" x:Name="Reload" Click="Reload_Click"   />
                                 </ContextMenu>
                             </DataGrid.ContextMenu>
 
                             <DataGrid.RowStyle>
                                 <Style TargetType="DataGridRow">
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding type}" Value="1">
-                                            <Setter Property="FontWeight" Value="bold"></Setter>
+                                        <DataTrigger Binding="{Binding IsAttribute}" Value="true">
+                                            <Setter Property="Foreground" Value="Red"></Setter>
                                         </DataTrigger>
-                                        <DataTrigger Binding="{Binding type}" Value="2">
-                                            <Setter Property="Foreground" Value="Gray"></Setter>
+                                        <DataTrigger Binding="{Binding IsAttribute}" Value="false">
+                                            <Setter Property="Foreground" Value="#FF9A07AC"></Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsRequired}" Value="true">
+                                            <Setter Property="FontWeight" Value="Bold"></Setter>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -227,27 +233,49 @@
                                 <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox IsChecked="{Binding Path=select}"  HorizontalAlignment="Center" VerticalAlignment="Center"  Checked="RequestGridSelect_Click" Unchecked="RequestGridDeselect_Click"/>
+                                            <CheckBox IsChecked="{Binding Path=Selected}"  HorizontalAlignment="Center" VerticalAlignment="Center"  />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Binding="{Binding level}" Width="5" Visibility="Collapsed"/>
-                                <DataGridTextColumn Binding="{Binding name}" Header="Name" Width="*" IsReadOnly="True" />
+
+                                <DataGridTextColumn Binding="{Binding DisplayName}" Header="Name" Width="*" IsReadOnly="True" />
                                 <DataGridTemplateColumn Header="Value" Width="1.5*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBox x:Name="ValueTextBox" BorderBrush="White" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Text="{Binding Path=value}" TextChanged="OnValueTextChanged">
-                                                <TextBox.ContextMenu>
-                                                    <ContextMenu>
-                                                        <MenuItem Header="Select" x:Name="RequestGridSelect" Click="RequestGridSelect_Click"  />
-                                                        <MenuItem Header="Deselect" x:Name="RequestGridDeselect" Click="RequestGridDeselect_Click" />
-                                                        <MenuItem Header="Select All" x:Name="RequestGridSelectAll" Click="RequestGridSelectAll_Click" />
-                                                        <MenuItem Header="Deselect All" x:Name="RequestGridDeselectAll" Click="RequestGridDeselectAll_Click" />
-                                                        <Separator />
-                                                        <MenuItem Header="Clear" x:Name="ClearAll" Click="ClearAll_Click" />
-                                                    </ContextMenu>
-                                                </TextBox.ContextMenu>
-                                            </TextBox>
+                                            <Grid HorizontalAlignment="Stretch" >
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBox x:Name="ValueTextBox" BorderBrush="White" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Text="{Binding Path=Value}" Tag="{Binding}" TextChanged="OnValueTextChanged">
+                                                    <TextBox.ContextMenu>
+                                                        <ContextMenu>
+                                                            <MenuItem Header="Select" x:Name="RequestGridSelect"  Click="RequestGridSelect_Click" />
+                                                            <MenuItem Header="Deselect" x:Name="RequestGridDeselect" Click="RequestGridDeselect_Click"  />
+                                                            <MenuItem Header="Select All" x:Name="RequestGridSelectAll" Click="RequestGridSelectAll_Click" />
+                                                            <MenuItem Header="Deselect All" x:Name="RequestGridDeselectAll" Click="RequestGridDeselectAll_Click" />
+                                                            <Separator />
+                                                            <MenuItem Header="Clear Values" x:Name="ClearAll" Click="ClearAll_Click"  />
+                                                            <MenuItem Header="Reload" x:Name="Reload" Click="Reload_Click"   />
+                                                        </ContextMenu>
+                                                    </TextBox.ContextMenu>
+                                                </TextBox>
+
+
+                                                <Button Name="ValueSelction" IsTabStop="False" Grid.Column="1" Width="20" Visibility="{Binding RestrictionSelection}" Content="..." Tag="{Binding}"  Click="OnValueSelctionClicked"></Button>
+                                                <Popup Placement="RelativePoint" MinHeight="280" MinWidth="450" Width="450" VerticalOffset="27" StaysOpen="False" IsOpen="{Binding IsPopupOpen}"  >
+                                                    <Grid Width="450">
+                                                        <DataGrid ItemsSource="{Binding Restrictions}" AutoGenerateColumns="False" ColumnWidth="*" Tag="{Binding}" 
+                                                                  CanUserAddRows="False" FontSize="12" IsReadOnly="True" HeadersVisibility="Column"
+                                                                  SelectionMode="Single" DataGridCell.Selected="RestrictionDataGrid_Selected" >
+                                                            <DataGrid.Columns >
+                                                                <DataGridTextColumn  Binding="{Binding}" Header="Items" />
+                                                            </DataGrid.Columns>
+                                                        </DataGrid>
+                                                    </Grid>
+                                                </Popup>
+                                            </Grid>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -300,9 +328,7 @@
 
                             <Border Margin="10,0,5,5" Background="White" VerticalAlignment="Center" BorderBrush="#999" BorderThickness="1">
                                 <TextBox x:Name="Search" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  FontSize="12" VerticalAlignment="Center" Height="22" 
-                                         
-                                         PreviewKeyUp="Search_PreviewKeyUp"
-                                         
+                                         TextChanged="Search_TextChanged"
                                          BorderBrush="Transparent" BorderThickness="0" Padding="5,0,5,0" Width="160" />
                             </Border>
 
@@ -319,15 +345,29 @@
                             </Grid.ColumnDefinitions>
                             <Grid x:Name="treeEditor" Grid.ColumnSpan="2">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="699*"/>
+                                    <ColumnDefinition Width="655*"/>
+                                    <ColumnDefinition Width="44*"/>
                                     <ColumnDefinition Width="247*"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition />
                                     <RowDefinition />
                                 </Grid.RowDefinitions>
-                                <TreeView  Background="White" Grid.RowSpan="2" BorderThickness="0" x:Name="treeView" FontSize="12" Grid.ColumnSpan="2" />
-                                <DataGrid Grid.Row="1" BorderThickness="0,1,0,0" x:Name="logDataGrid" Visibility="Collapsed" FontSize="12" Grid.ColumnSpan="2" />
+                                <TreeView  Background="White" Grid.RowSpan="2" BorderThickness="0" x:Name="treeView" FontSize="12" Grid.ColumnSpan="3"
+                                           VirtualizingStackPanel.IsVirtualizing="True"
+                                           VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                           ItemContainerStyle="{StaticResource TreeViewExpandAll}">
+                                    <TreeView.ItemTemplate>
+                                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox Background="Transparent" BorderThickness="0" Text="{Binding Name, Mode=OneTime}" IsReadOnly="True" Foreground="#FF9A07AC" TextWrapping="Wrap" />
+                                                <TextBox Background="Transparent" BorderThickness="0" Foreground="Blue" Text="{Binding Value}" IsReadOnly="True" TextWrapping="Wrap" />
+                                                <TextBox Background="Transparent" BorderThickness="0" Foreground="Red" Text="{Binding AttributesString, Mode=OneTime}" IsReadOnly="True" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </HierarchicalDataTemplate>
+                                    </TreeView.ItemTemplate>
+                                </TreeView>
+                                <DataGrid Grid.Row="1" BorderThickness="0,1,0,0" x:Name="logDataGrid" Visibility="Collapsed" FontSize="12" Grid.ColumnSpan="3" />
                             </Grid>
                             <avalonEdit:TextEditor Visibility="Hidden" xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit" Name="responceEditor" 
                                                    HorizontalScrollBarVisibility="Disabled" WordWrap="True" VerticalScrollBarVisibility="Auto" SyntaxHighlighting="XML"

@@ -7,6 +7,34 @@
         mc:Ignorable="d" ShowInTaskbar="False" 
         Title="Servers" Height="450" Width="800">
     <Grid>
+        <Grid.Resources>
+            <Style x:Key="TransparentStyle"  TargetType="{x:Type Button }">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border>
+                                <Border.Style>
+                                    <Style TargetType="{x:Type Border}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding UserName}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
+                                <Grid Background="Transparent">
+                                    <ContentPresenter></ContentPresenter>
+                                </Grid>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="52" />
@@ -30,7 +58,16 @@
                     <DataGridTextColumn Binding="{Binding Url}" Header="Server Url" Width="1*" IsReadOnly="True" />
                     <DataGridTextColumn Binding="{Binding UserName}" Header="User Name" Width="0.5*"/>
                     <DataGridTextColumn Binding="{Binding Password}" Visibility="Collapsed" Width="0.5*"/>
-                </DataGrid.Columns>
+                <DataGridTemplateColumn ClipboardContentBinding="{x:Null}" Width="40" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate >
+                            <Button x:Name="DeleteButton" BorderBrush="Transparent" Background="Transparent" Click="DeleteButton_Click" >
+                                <Image Width="18" Height="18" Source="delete.png"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
             
             </DataGrid>
         <Button Grid.Row="1" Width="48" Height="32" Content="Done" Click="Button_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" />
