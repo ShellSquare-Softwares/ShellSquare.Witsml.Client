@@ -41,16 +41,16 @@
                     <ControlTemplate TargetType="{x:Type ToggleButton}">
                         <StackPanel Orientation="Horizontal">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                            <Border x:Name="on" Width="72" Height="20" Background="#93a1b8" CornerRadius="0" Margin="10,0,0,0">
-                                <TextBlock x:Name="onText" FontWeight="Bold" Text="Xml View" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border x:Name="on" Width="72" Height="20" Background="#354052" BorderThickness="1" BorderBrush="White" Margin="10,0,0,0">
+                                <TextBlock x:Name="onText" Foreground="White" FontWeight="Bold" Text="Xml View" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <Border x:Name="off" Width="72" Height="20" Background="#93a1b8" CornerRadius="0">
-                                <TextBlock x:Name="offText" FontWeight="Bold" Text="Tree View" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border x:Name="off" Width="72" Height="20" Background="#354052" BorderThickness="1" BorderBrush="White" >
+                                <TextBlock x:Name="offText" Foreground="White" FontWeight="Bold" Text="Tree View" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </StackPanel>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsEnabled" Value="false">
-                                <Setter Property="Foreground" Value="#354052"/>
+                                <Setter Property="Foreground" Value="White"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="true">
                                 <Setter TargetName="on" Property="Background" Value="White"/>
@@ -331,13 +331,13 @@
 
                             <Border Margin="10,0,5,5" Background="White" VerticalAlignment="Center" BorderBrush="#999" BorderThickness="1">
                                 <TextBox x:Name="Search" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  FontSize="12" VerticalAlignment="Center" Height="22" 
-                                         TextChanged="Search_TextChanged"
+                                        Visibility="Collapsed"
                                          BorderBrush="Transparent" BorderThickness="0" Padding="5,0,5,0" Width="160" />
                             </Border>
 
 
-                            <TextBlock FontSize="12" Foreground="#FFF" FontWeight="Bold" Margin="5,0,0,5" VerticalAlignment="Center" >Search</TextBlock>
-                            <ToggleButton Margin="5,0,5,5" Style="{StaticResource ToggleButtonStyle}"  IsChecked="false" x:Name="XmlToggle" Click="XmlToggle_Click"   />
+                            <TextBlock Visibility="Collapsed" FontSize="12" Foreground="#FFF" FontWeight="Bold" Margin="5,0,0,5" VerticalAlignment="Center" >Search</TextBlock>
+                            <ToggleButton Margin="5,0,5,5" Style="{StaticResource ToggleButtonStyle}" Focusable="False"  IsChecked="false" x:Name="XmlToggle" Click="XmlToggle_Click"   />
                         </StackPanel>
                     </Grid>
                     <Border Grid.Row="1" Margin="0,0,0,0" BorderThickness="1" BorderBrush="#6F7E95">

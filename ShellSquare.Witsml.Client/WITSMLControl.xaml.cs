@@ -31,9 +31,10 @@ namespace ShellSquare.Witsml.Client
     {
         private DispatcherTimer m_DelayFlagUpdate;
         private DispatcherTimer m_RequestEditorChangeMonitor;
-        private OptionSelection M_optionSelection;
+        private OptionSelection m_OptionSelection;
         private TabHeaderControl m_TabHeader;
         private bool m_ProgrammaticallyChanging = false;
+        private bool m_ValueTextBoxFocused = false;
 
         public WITSMLControl(TabHeaderControl tabHeader)
         {
@@ -308,36 +309,19 @@ namespace ShellSquare.Witsml.Client
             }
         }
 
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
         private void ValueTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-
+            m_ValueTextBoxFocused = true;
         }
 
         private void ValueTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-
+            m_ValueTextBoxFocused = false;
         }
 
         private void OnValueTextChanged(object sender, TextChangedEventArgs e)
         {
-            if (m_ProgrammaticallyChanging == false)
+            if (m_ValueTextBoxFocused == true)
             {
                 m_ProgrammaticallyChanging = true;
                 var txt = sender as TextBox;
@@ -349,11 +333,6 @@ namespace ShellSquare.Witsml.Client
                         node.Value = txt.Text;
                         node.Selected = true;
                         LoadRequestEditor();
-                        if(node.Value != txt.Text)
-                        {
-                            node.Value = txt.Text;
-                            LoadRequestEditor();
-                        }
                     }
                 }
             }
@@ -533,21 +512,6 @@ namespace ShellSquare.Witsml.Client
             FreshLoad();
         }
 
-        //private void CheckBox_Checked(object sender, RoutedEventArgs e)
-        //{
-        //    OnCheckBoxStateChnages(sender);
-        //}
-
-        //private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
-        //{
-        //    OnCheckBoxStateChnages(sender);
-        //}
-
-        //private void OnCheckBoxStateChnages(object sender)
-        //{
-            
-        //}
-
         private void CheckBox_Click(object sender, RoutedEventArgs e)
         {
             if (m_ProgrammaticallyChanging == false)
@@ -567,22 +531,63 @@ namespace ShellSquare.Witsml.Client
         }
 
 
-
-
-
-
-
-
-
-
-        /********* Not used code *****************************/
-
-        private void OptionsSelected(string options)
+        private void OnValueSelctionClicked(object sender, RoutedEventArgs e)
         {
-            this.Dispatcher.Invoke(() =>
+            var button = sender as Button;
+            GridNode node = button.Tag as GridNode;
+            node.IsPopupOpen = true;
+
+        }
+
+        private void RestrictionDataGrid_Selected(object sender, RoutedEventArgs e)
+        {
+            DataGrid dg = sender as DataGrid;
+            GridNode gridNode = dg.Tag as GridNode;
+            gridNode.IsPopupOpen = false;
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+            PerformGridClick(dep, gridNode);
+        }
+
+        private void PerformGridClick(DependencyObject dep, GridNode gridNode)
+        {
+            while ((dep != null) &&
+           !(dep is DataGridCell) &&
+           !(dep is DataGridColumnHeader))
             {
-                Options.Text = options;
-            });
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            if (dep == null)
+                return;
+
+            if (dep is DataGridColumnHeader)
+            {
+                DataGridColumnHeader columnHeader = dep as DataGridColumnHeader;
+                // do something
+            }
+
+            if (dep is DataGridCell)
+            {
+                DataGridCell cell = dep as DataGridCell;
+                if (cell.Column.DisplayIndex == 0)
+                {
+                    DataGridRow row = DataGridRow.GetRowContainingElement(cell);
+
+                    string value = row.Item as string;
+                    if (value != null)
+                    {
+                        gridNode.Value = value;
+                        gridNode.Selected = true;
+
+                        if (m_ProgrammaticallyChanging == false)
+                        {
+                            m_ProgrammaticallyChanging = true;
+                            LoadRequestEditor();
+                        }
+                    }
+
+                }
+            }
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
@@ -618,27 +623,7 @@ namespace ShellSquare.Witsml.Client
                 if (EnableTree.IsChecked.Value)
                 {
                     XDocument doc = XDocument.Parse(capabilities);
-
-                    WitsmlNode witsmlNode = new WitsmlNode();
-                    witsmlNode.Name = doc.Root.Name.LocalName;
-                    if (doc.Root.HasElements)
-                    {
-                        var children = GetChildren(doc.Root);
-                        if (children != null)
-                        {
-                            witsmlNode.Children.AddRange(children);
-                        }
-                    }
-                    else
-                    {
-                        witsmlNode.Value = doc.Root.Value;
-                    }
-
-
-                    var nodeList = new List<WitsmlNode>();
-                    nodeList.Add(witsmlNode);
-
-                    treeView.ItemsSource = nodeList;
+                    LoadResponceGrid(doc);
                 }
 
                 responceEditor.Text = capabilities;
@@ -653,6 +638,79 @@ namespace ShellSquare.Witsml.Client
                 ProgressDisplay.Visibility = Visibility.Collapsed;
                 DisplayError($"Failed with the message: {ex.Message}");
             }
+        }
+
+        private void LoadResponceGrid(XDocument doc)
+        {
+            WitsmlNode witsmlNode = new WitsmlNode();
+            witsmlNode.Name = doc.Root.Name.LocalName;
+            if (doc.Root.HasElements)
+            {
+                var children = GetChildren(doc.Root);
+                if (children != null)
+                {
+                    witsmlNode.Children.AddRange(children);
+                }
+            }
+            else
+            {
+                witsmlNode.Value = doc.Root.Value;
+            }
+
+
+            var nodeList = new List<WitsmlNode>();
+            nodeList.Add(witsmlNode);
+
+            treeView.ItemsSource = nodeList;
+        }
+
+        private void SaveToPreference()
+        {
+            Properties.Settings.Default.Url = ServerUrl.Text;
+            Properties.Settings.Default.UserName = UserName.Text;
+            Properties.Settings.Default.Password = Password.Password;
+
+            string serversJson = Properties.Settings.Default.Servers;
+            List<ServerInfo> servers = new List<ServerInfo>();
+            if (string.IsNullOrWhiteSpace(serversJson) == false)
+            {
+                servers = JsonConvert.DeserializeObject<List<ServerInfo>>(serversJson);
+            }
+
+            bool present = false;
+            foreach (var item in servers)
+            {
+                if (item.Url.ToLower() == ServerUrl.Text.ToLower() && item.UserName.ToLower() == item.UserName.ToLower())
+                {
+                    item.Password = Password.Password;
+                    present = true;
+                    break;
+                }
+            }
+
+            if (present == false)
+            {
+                servers.Add(new ServerInfo()
+                {
+                    Url = ServerUrl.Text,
+                    UserName = UserName.Text,
+                    Password = Password.Password
+
+                });
+            }
+
+
+            Properties.Settings.Default.Servers = JsonConvert.SerializeObject(servers);
+
+            Properties.Settings.Default.Save();
+        }
+
+        private void LoadPreference()
+        {
+            ServerUrl.Text = Properties.Settings.Default.Url ?? "";
+            UserName.Text = Properties.Settings.Default.UserName ?? "";
+            Password.Password = Properties.Settings.Default.Password ?? "";
+            m_TabHeader.Tittle = Properties.Settings.Default.Url ?? "localhost";
         }
 
         private void DisplayError(string message)
@@ -684,6 +742,21 @@ namespace ShellSquare.Witsml.Client
             treeView.ItemsSource = result;
         }
 
+        private void GetOption_Click(object sender, RoutedEventArgs e)
+        {
+            m_OptionSelection = new OptionSelection();
+            m_OptionSelection.OptionsSelected = OptionsSelected;
+            m_OptionSelection.ShowDialog();
+        }
+
+        private void OptionsSelected(string options)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                Options.Text = options;
+            });
+        }
+
         private List<WitsmlNode> GetChildren(XElement element)
         {
 
@@ -712,8 +785,6 @@ namespace ShellSquare.Witsml.Client
                         }
 
 
-
-
                         if (childElement.Name.LocalName.ToLower() == "logdata")
                         {
                             logDataGrid.Visibility = Visibility.Visible;
@@ -730,52 +801,8 @@ namespace ShellSquare.Witsml.Client
 
                             result.Add(childNode);
                         }
-
-
-
-                        //string attributes = "";
-                        //if (childElement.HasAttributes)
-                        //{
-                        //    foreach (var att in childElement.Attributes())
-                        //    {
-                        //        attributes += " " + att.Name + "=\"" + att.Value + "\"";
-                        //    }
-                        //}
-
-
-                        //string value;
-
-                        //if (childElement.HasElements)
-                        //{
-                        //    value = "";
-                        //}
-                        //else
-                        //{
-                        //    value = childElement.Value;
-                        //}
-
-                        //var level = (int)treeNode.Tag;
-
-                        //TreeViewItemHeader header = new TreeViewItemHeader();
-                        //header.HeaderText = childElement.Name.LocalName;
-                        //header.ValueText = value;
-                        //header.AttributeText = attributes;
-
-                        //TreeViewItem childTreeNode = new TreeViewItem
-                        //{
-                        //    //Get First attribute where it is equal to value
-                        //    Header = header,
-                        //    //Automatically expand elements
-                        //    IsExpanded = expand,
-                        //    Tag = level + 1
-                        //};
-
-
-
                         break;
                     case XmlNodeType.Text:
-                        //XText childText = child as XText;
-                        //treeNode.Items.Add(new TreeViewItem { Header = childText.Value, });
                         break;
                 }
             }
@@ -842,277 +869,6 @@ namespace ShellSquare.Witsml.Client
             }
         }
 
-
-
-
-
-        private void SaveToPreference()
-        {
-            Properties.Settings.Default.Url = ServerUrl.Text;
-            Properties.Settings.Default.UserName = UserName.Text;
-            Properties.Settings.Default.Password = Password.Password;
-
-            string serversJson = Properties.Settings.Default.Servers;
-            List<ServerInfo> servers = new List<ServerInfo>();
-            if (string.IsNullOrWhiteSpace(serversJson) == false)
-            {
-                servers = JsonConvert.DeserializeObject<List<ServerInfo>>(serversJson);
-            }
-
-            bool present = false;
-            foreach (var item in servers)
-            {
-                if (item.Url.ToLower() == ServerUrl.Text.ToLower() && item.UserName.ToLower() == item.UserName.ToLower())
-                {
-                    item.Password = Password.Password;
-                    present = true;
-                    break;
-                }
-            }
-
-            if (present == false)
-            {
-                servers.Add(new ServerInfo()
-                {
-                    Url = ServerUrl.Text,
-                    UserName = UserName.Text,
-                    Password = Password.Password
-
-                });
-            }
-
-
-            Properties.Settings.Default.Servers = JsonConvert.SerializeObject(servers);
-
-            Properties.Settings.Default.Save();
-        }
-
-        private void LoadPreference()
-        {
-            ServerUrl.Text = Properties.Settings.Default.Url ?? "";
-            UserName.Text = Properties.Settings.Default.UserName ?? "";
-            Password.Password = Properties.Settings.Default.Password ?? "";
-            m_TabHeader.Tittle = Properties.Settings.Default.Url ?? "localhost";
-        }
-
-        private void OnTextChanged(object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-                this.Dispatcher.Invoke(() =>
-                {
-                    DataTable modifiedDataTable = new DataTable();
-                    modifiedDataTable.Columns.Add("select", typeof(bool));
-                    modifiedDataTable.Columns.Add("name", typeof(string));
-                    modifiedDataTable.Columns.Add("value", typeof(string));
-                    modifiedDataTable.Columns.Add("type", typeof(int));
-                    modifiedDataTable.Columns.Add("level", typeof(int));
-                    modifiedDataTable.Columns.Add("parent", typeof(string));
-
-                    if (!string.IsNullOrEmpty(requestEditor.Text))
-                    {
-                        XDocument xDocument = XDocument.Parse(requestEditor.Text);
-                        ParseRequest(xDocument.Root, 0, ref modifiedDataTable, string.Empty);
-                    }
-
-                });
-            }
-            catch (Exception ex)
-            {
-            }
-        }
-
-
-
-        public DataTable CompareAndUpdateDataTable(DataTable currentDataTable, DataTable modifiedDataTable)
-        {
-            for (int i = 0; i < currentDataTable.Rows.Count; i++)
-            {
-                if (modifiedDataTable.Rows.Count != 0)
-                {
-                    bool isExist = false;
-                    for (int j = 0; j < modifiedDataTable.Rows.Count; j++)
-                    {
-                        if (modifiedDataTable.Rows[j][1].ToString().Trim() == currentDataTable.Rows[i][1].ToString().Trim()//check name
-                            && Convert.ToInt32(modifiedDataTable.Rows[j][4]) == Convert.ToInt32(currentDataTable.Rows[i][4])//check level
-                            && modifiedDataTable.Rows[j][5].ToString().Trim() == currentDataTable.Rows[i][5].ToString().Trim())//check parent
-                        {
-                            currentDataTable.Rows[i][0] = true;
-                            currentDataTable.Rows[i][1] = modifiedDataTable?.Rows[j][1];
-                            currentDataTable.Rows[i][2] = modifiedDataTable?.Rows[j][2];
-                            currentDataTable.Rows[i][3] = modifiedDataTable?.Rows[j][3];
-                            currentDataTable.Rows[i][4] = modifiedDataTable?.Rows[j][4];
-                            isExist = true;
-                            break;
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
-                    if (!isExist)
-                    {
-                        currentDataTable.Rows[i][0] = false;
-                    }
-                }
-                else
-                {
-                    currentDataTable.Rows[i][0] = false;
-                }
-            }
-            return currentDataTable;
-        }
-
-
-
-        private void ParseRequest(XElement element, int level, ref DataTable dt, string parentName)
-        {
-            parentName = parentName + "\\";
-            DataRow row;
-            foreach (XNode child in element.Nodes())
-            {
-                switch (child.NodeType)
-                {
-                    case XmlNodeType.Element:
-                        XElement childElement = child as XElement;
-
-                        if (childElement.HasElements)
-                        {
-                            string parent = parentName + childElement.Parent.Name.LocalName;
-                            row = dt.NewRow();
-                            row[0] = true;
-                            row[1] = new string(' ', level) + new string(' ', level) + childElement.Name.LocalName;
-                            row[2] = "";
-                            row[3] = 1;
-                            row[4] = level;
-                            row[5] = parent;
-
-                            dt.Rows.Add(row);
-
-                            foreach (var attribute in childElement.Attributes())
-                            {
-                                row = dt.NewRow();
-                                row[0] = true;
-                                row[1] = new string(' ', level + 1) + new string(' ', level + 1) + attribute.Name;
-                                row[2] = attribute.Value;
-                                row[3] = 2;
-                                row[4] = level + 0;
-                                row[5] = parent + "\\" + attribute.Parent.Name.LocalName;
-                                dt.Rows.Add(row);
-                            }
-
-                            ParseRequest(childElement, level + 1, ref dt, parent);
-                        }
-                        else
-                        {
-                            string parent = parentName + childElement.Parent.Name.LocalName;
-                            row = dt.NewRow();
-                            row[0] = true;
-                            row[1] = new string(' ', level) + new string(' ', level) + childElement.Name.LocalName;
-
-                            if (childElement.FirstNode != null && childElement.FirstNode.NodeType == XmlNodeType.Text)
-                            {
-                                row[2] = (childElement.FirstNode as XText).Value;
-                            }
-                            row[3] = 0;
-                            row[4] = level;
-                            row[5] = parent;
-                            dt.Rows.Add(row);
-
-                            foreach (var attribute in childElement.Attributes())
-                            {
-                                row = dt.NewRow();
-                                row[0] = true;
-                                row[1] = new string(' ', level + 1) + new string(' ', level + 1) + attribute.Name;
-                                row[2] = attribute.Value;
-                                row[3] = 2;
-                                row[4] = level + 0;
-                                row[5] = parent + "\\" + attribute.Parent.Name.LocalName;
-                                dt.Rows.Add(row);
-                            }
-                        }
-                        break;
-                }
-            }
-        }
-
-
-
-
-
-
-        private void LoadEmptyTemplatesXML()
-        {
-            //XmlDocument document = new XmlDocument();
-            //try
-            //{
-            //    string templatePath = string.Empty;
-            //    string key = $"{Templates.SelectedValue}${m_SubTemplate}";
-            //    if (m_KeyData.ContainsKey(key))
-            //    {
-            //        templatePath = m_KeyData[key];
-            //        document.Load(templatePath);
-            //        XmlNode root = document.DocumentElement;
-            //        root.RemoveAll();
-            //        CommonData(document);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    DisplayError($"<message>Failed with the message: {ex.Message} </message>");
-            //}
-        }
-
-
-        private void Search_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            try
-            {
-                int pointer = 1;
-                string searchedText = Search.Text;
-                if (responceEditor.Visibility == Visibility.Visible)
-                {
-                    Color backgroundColor = (Color)ColorConverter.ConvertFromString("Yellow");
-                    Color fontColor = (Color)ColorConverter.ConvertFromString("Black");
-                    int counter = 1;
-                    if (searchedText.Length != 0)
-                    {
-                        while (counter < 3)
-                        {
-                            int index = responceEditor.Text.ToLower().IndexOf(searchedText.ToLower(), pointer);
-                            //if keyword not found
-                            if (index == -1)
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                //else TODO
-                                responceEditor.Select(index, searchedText.Length);
-                                //   to highlight
-                                responceEditor.TextArea.SelectionBrush = new SolidColorBrush(backgroundColor);
-                                responceEditor.TextArea.SelectionForeground = new SolidColorBrush(fontColor);
-                                pointer = index + searchedText.Length;
-                                //TODO
-
-                            }
-                            counter++;
-                        }
-                    }
-                    else
-                    {
-                        responceEditor.Select(0, 0);
-                    }
-
-
-                }
-            }
-            catch (Exception ex)
-            {
-                DisplayError($"<message>Failed with the message: {ex.Message} </message>");
-            }
-        }
-
         private void GetData_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1148,26 +904,29 @@ namespace ShellSquare.Witsml.Client
 
                 if (EnableTree.IsChecked.Value)
                 {
-                    WitsmlNode witsmlNode = new WitsmlNode();
-                    witsmlNode.Name = doc.Root.Name.LocalName;
-                    if (doc.Root.HasElements)
-                    {
-                        var children = GetChildren(doc.Root);
-                        if (children != null)
-                        {
-                            witsmlNode.Children.AddRange(children);
-                        }
-                    }
-                    else
-                    {
-                        witsmlNode.Value = doc.Root.Value;
-                    }
+
+                    LoadResponceGrid(doc);
+
+                    //WitsmlNode witsmlNode = new WitsmlNode();
+                    //witsmlNode.Name = doc.Root.Name.LocalName;
+                    //if (doc.Root.HasElements)
+                    //{
+                    //    var children = GetChildren(doc.Root);
+                    //    if (children != null)
+                    //    {
+                    //        witsmlNode.Children.AddRange(children);
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    witsmlNode.Value = doc.Root.Value;
+                    //}
 
 
-                    var nodeList = new List<WitsmlNode>();
-                    nodeList.Add(witsmlNode);
+                    //var nodeList = new List<WitsmlNode>();
+                    //nodeList.Add(witsmlNode);
 
-                    treeView.ItemsSource = nodeList;
+                    //treeView.ItemsSource = nodeList;
                 }
 
 
@@ -1297,8 +1056,6 @@ namespace ShellSquare.Witsml.Client
             }
         }
 
-
-
         private string GetType(string xml)
         {
             XDocument doc = XDocument.Parse(xml);
@@ -1313,54 +1070,17 @@ namespace ShellSquare.Witsml.Client
             }
 
             return stringName.ToLower();
-
-        }
-
-
-
-        private void OnValueTextChanged(object sender, EventArgs eventArg)
-        {
-            //try
-            //{
-            //    if (requestGrid.IsKeyboardFocusWithin)
-            //    {
-            //        var valueTextBox = ((TextBox)sender).Text;
-            //        if (!string.IsNullOrEmpty(valueTextBox))
-            //        {
-            //            var items = requestGrid.SelectedCells;
-            //            foreach (var item in items)
-            //            {
-            //                ((DataRowView)item.Item).Row[2] = valueTextBox;
-            //                ((DataRowView)item.Item).Row[0] = true;
-            //            }
-
-            //        }
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-
-            //}
-        }
-
-
-
-        private void GetOption_Click(object sender, RoutedEventArgs e)
-        {
-            M_optionSelection = new OptionSelection();
-            M_optionSelection.OptionsSelected = OptionsSelected;
-            M_optionSelection.ShowDialog();
         }
 
         private void ChooseButton_Click(object sender, RoutedEventArgs e)
         {
             Servers servers = new Servers();
             servers.Load();
-            servers.ServerSelected = DisplayServer;
+            servers.ServerSelected = OnServerSelected;
             servers.ShowDialog();
         }
 
-        private void DisplayServer(string url, string username, string password)
+        private void OnServerSelected(string url, string username, string password)
         {
             ServerUrl.Text = url;
             UserName.Text = username;
@@ -1385,6 +1105,7 @@ namespace ShellSquare.Witsml.Client
         {
             if (!EnableTree.IsChecked.Value)
             {
+                XmlToggle.IsChecked = false;
                 responceEditor.Visibility = Visibility.Visible;
                 treeEditor.Visibility = Visibility.Collapsed;
                 XmlToggle.Visibility = Visibility.Collapsed;
@@ -1392,64 +1113,78 @@ namespace ShellSquare.Witsml.Client
             }
             else
             {
-                XmlToggle.IsChecked = true;
+                XmlToggle.IsChecked = false;
                 responceEditor.Visibility = Visibility.Collapsed;
                 treeEditor.Visibility = Visibility.Visible;
                 XmlToggle.Visibility = Visibility.Visible;
+
+                XDocument doc = XDocument.Parse(responceEditor.Text);
+                LoadResponceGrid(doc);
             }
         }
 
-        private void OnValueSelctionClicked(object sender, RoutedEventArgs e)
-        {
-            var button = sender as Button;
-            GridNode node = button.Tag as GridNode;
-            node.IsPopupOpen = true;
 
-        }
+        /********* Not used code *****************************/
 
-        private void RestrictionDataGrid_Selected(object sender, RoutedEventArgs e)
-        {
-            DataGrid dg = sender as DataGrid;
-            GridNode gridNode = dg.Tag as GridNode;
-            gridNode.IsPopupOpen = false;
-            DependencyObject dep = (DependencyObject)e.OriginalSource;
-            PerformGridClick(dep, gridNode);
-        }
 
-        private void PerformGridClick(DependencyObject dep, GridNode gridNode)
-        {
-            while ((dep != null) &&
-           !(dep is DataGridCell) &&
-           !(dep is DataGridColumnHeader))
-            {
-                dep = VisualTreeHelper.GetParent(dep);
-            }
 
-            if (dep == null)
-                return;
+        //private void Search_TextChanged(object sender, TextChangedEventArgs e)
+        //{
+        //    try
+        //    {
+        //        int pointer = 1;
+        //        string searchedText = Search.Text;
+        //        if (responceEditor.Visibility == Visibility.Visible)
+        //        {
+        //            Color backgroundColor = (Color)ColorConverter.ConvertFromString("Yellow");
+        //            Color fontColor = (Color)ColorConverter.ConvertFromString("Black");
+        //            int counter = 1;
+        //            if (searchedText.Length != 0)
+        //            {
+        //                while (counter < 3)
+        //                {
+        //                    int index = responceEditor.Text.ToLower().IndexOf(searchedText.ToLower(), pointer);
+        //                    //if keyword not found
+        //                    if (index == -1)
+        //                    {
+        //                        break;
+        //                    }
+        //                    else
+        //                    {
+        //                        //else TODO
+        //                        responceEditor.Select(index, searchedText.Length);
+        //                        //   to highlight
+        //                        responceEditor.TextArea.SelectionBrush = new SolidColorBrush(backgroundColor);
+        //                        responceEditor.TextArea.SelectionForeground = new SolidColorBrush(fontColor);
+        //                        pointer = index + searchedText.Length;
+        //                        //TODO
 
-            if (dep is DataGridColumnHeader)
-            {
-                DataGridColumnHeader columnHeader = dep as DataGridColumnHeader;
-                // do something
-            }
+        //                    }
+        //                    counter++;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                responceEditor.Select(0, 0);
+        //            }
 
-            if (dep is DataGridCell)
-            {
-                DataGridCell cell = dep as DataGridCell;
-                if (cell.Column.DisplayIndex == 0)
-                {
-                    DataGridRow row = DataGridRow.GetRowContainingElement(cell);
 
-                    string value = row.Item as string;
-                    if (value != null)
-                    {
-                        gridNode.Value = value;
-                        gridNode.Selected = true;
-                    }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        DisplayError($"<message>Failed with the message: {ex.Message} </message>");
+        //    }
+        //}
 
-                }
-            }
-        }
+        
+
+
+
+        
+
+       
+
+        
     }
 }
