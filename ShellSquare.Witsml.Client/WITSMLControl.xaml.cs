@@ -9,12 +9,14 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -35,6 +37,7 @@ namespace ShellSquare.Witsml.Client
         private TabHeaderControl m_TabHeader;
         private bool m_ProgrammaticallyChanging = false;
         private bool m_ValueTextBoxFocused = false;
+        public string ViewDeterminant = "T";//T stands for Tree View and X stands for XML view.X FOR UNKNOWN TYPE
 
         public WITSMLControl(TabHeaderControl tabHeader)
         {
@@ -218,15 +221,12 @@ namespace ShellSquare.Witsml.Client
                     }
                 }
             }
-
-
             foreach (var item in element.Elements())
             {
                 int l = level + 1;
                 var r = ParseRequest(item, child, newPath, l);
                 result.AddRange(r);
             }
-
             return result;
 
         }
@@ -662,6 +662,8 @@ namespace ShellSquare.Witsml.Client
             nodeList.Add(witsmlNode);
 
             treeView.ItemsSource = nodeList;
+
+            
         }
 
         private void SaveToPreference()
@@ -731,6 +733,7 @@ namespace ShellSquare.Witsml.Client
         private void DisplayMessage(string message)
         {
             responceEditor.Text = message;
+
             var result = new List<WitsmlNode>();
             WitsmlNode witsmlNode = new WitsmlNode()
             {
@@ -1091,16 +1094,17 @@ namespace ShellSquare.Witsml.Client
         {
             if (XmlToggle.IsChecked == false)
             {
+                ViewDeterminant = "T";//TREE
                 responceEditor.Visibility = Visibility.Collapsed;
                 treeEditor.Visibility = Visibility.Visible;
             }
             else
             {
+                ViewDeterminant = "X";//XML
                 responceEditor.Visibility = Visibility.Visible;
                 treeEditor.Visibility = Visibility.Collapsed;
             }
         }
-
         private void EnableTree_Click(object sender, RoutedEventArgs e)
         {
             if (!EnableTree.IsChecked.Value)
@@ -1109,7 +1113,6 @@ namespace ShellSquare.Witsml.Client
                 responceEditor.Visibility = Visibility.Visible;
                 treeEditor.Visibility = Visibility.Collapsed;
                 XmlToggle.Visibility = Visibility.Collapsed;
-
             }
             else
             {
@@ -1120,6 +1123,127 @@ namespace ShellSquare.Witsml.Client
 
                 XDocument doc = XDocument.Parse(responceEditor.Text);
                 LoadResponceGrid(doc);
+            }
+        }
+
+
+        private void txtSearch_GotFocus(object sender, RoutedEventArgs e)
+        {
+            //if (txtSearch.Text.Trim() == "") 
+            //{
+            //    txtSearch.Text = "Search";
+            //    return;
+            //}
+            
+            if (txtSearch.Text.Trim() == "Search")
+            {
+                txtSearch.Clear();
+                return;
+            }
+        }
+
+        private void treeCollapseAll_Click(object sender, RoutedEventArgs e)
+        {
+    
+            treeExpandAll.Visibility = Visibility.Visible;
+            treeCollapseAll.Visibility = Visibility.Collapsed;
+            treeView.SetExpansion(isExpanded: false);
+
+
+        }
+
+        public void CollapseTreeviewItems(TreeViewItem Item)
+        {
+            Item.IsExpanded = false;
+            foreach (TreeViewItem item in Item.Items)
+            {
+                item.IsExpanded = false;
+
+                if (item.HasItems)
+                    CollapseTreeviewItems(item);
+            }
+           
+        }
+
+        private void treeExpandAll_Click(object sender, RoutedEventArgs e)
+        {
+            treeCollapseAll.Visibility = Visibility.Visible;
+            treeExpandAll.Visibility = Visibility.Collapsed;
+            treeView.SetExpansion(isExpanded: true);
+        }
+
+        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            //TreeViewItem tv = obj as TreeViewItem;
+            if (ViewDeterminant == "T" )
+            {
+               if( this.treeView!=null )
+                FindControlItem(this.treeView);
+            }
+            //FindControlItem(VisualTreeHelper.GetChild(obj as DependencyObject, i));
+        }
+
+
+        public void FindControlItem(DependencyObject obj)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                //ListViewItem lv = obj as ListViewItem;
+                //DataGridCell dg = obj as DataGridCell;
+                TreeViewItem tv = obj as TreeViewItem;
+                if (tv != null)
+                {
+                    HighlightText(tv);
+                }
+                FindControlItem(VisualTreeHelper.GetChild(obj as DependencyObject, i));
+            }
+        }
+
+
+        private void HighlightText(Object itx)
+        {
+            if (itx != null)
+            {
+                if (itx is TextBlock)
+                {
+                    Regex regex = new Regex("(" + txtSearch.Text + ")", RegexOptions.IgnoreCase);
+                    TextBlock tb = itx as TextBlock;
+                    if (txtSearch.Text.Length == 0)
+                    {
+                        string str = tb.Text;
+                        tb.Inlines.Clear();
+                        tb.Inlines.Add(str);
+                        return;
+                    }
+                    string[] substrings = regex.Split(tb.Text);
+                    tb.Inlines.Clear();
+                    foreach (var item in substrings)
+                    {
+                        if (regex.Match(item).Success)
+                        {
+                            Run runx = new Run(item);
+                            runx.Background = Brushes.LightBlue;
+                            tb.Inlines.Add(runx);
+
+
+                            ////Expand that node here.
+                            ///
+
+                        }
+                        else
+                        {
+                            tb.Inlines.Add(item);
+                        }
+                    }
+                  // return;
+                }
+                else
+                {
+                    for (int i = 0; i < VisualTreeHelper.GetChildrenCount(itx as DependencyObject); i++)
+                    {
+                        HighlightText(VisualTreeHelper.GetChild(itx as DependencyObject, i));
+                    }
+                }
             }
         }
 
@@ -1177,14 +1301,41 @@ namespace ShellSquare.Witsml.Client
         //    }
         //}
 
-        
+    }
 
+    public static class TreeViewExtensions
+    {
+        public static void SetExpansion(this TreeView treeView, bool isExpanded) =>
+          SetExpansion((ItemsControl)treeView, isExpanded);
 
+        static void SetExpansion(ItemsControl parent, bool isExpanded)
+        {
+            if (parent is TreeViewItem tvi)
+                tvi.IsExpanded = isExpanded;
+            if (parent != null)
+            {
+                if (parent.HasItems)
+                    foreach (var item in parent.Items.Cast<object>()
+                  .Select(i => GetTreeViewItem(parent, i, isExpanded)))
+                        SetExpansion(item, isExpanded);
+            }
+        }
+        static TreeViewItem GetTreeViewItem(
+          ItemsControl parent, object item, bool isExpanded)
+        {
+            if (item is TreeViewItem tvi)
+                return tvi;
 
-        
+            var result = ContainerFromItem(parent, item);
+            if (result == null && isExpanded)
+            {
+                parent.UpdateLayout();
+                result = ContainerFromItem(parent, item);
+            }
+            return result;
+        }
 
-       
-
-        
+        static TreeViewItem ContainerFromItem(ItemsControl parent, object item) =>
+          (TreeViewItem)parent.ItemContainerGenerator.ContainerFromItem(item);
     }
 }

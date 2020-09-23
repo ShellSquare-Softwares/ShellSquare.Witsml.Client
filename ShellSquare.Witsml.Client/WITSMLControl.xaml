@@ -327,7 +327,7 @@
                             <TextBlock FontSize="12" Foreground="#FFF"  Margin="5,-3,0,0" VerticalAlignment="Center" x:Name="elapsedTime"></TextBlock>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" FlowDirection="RightToLeft">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" FlowDirection="RightToLeft" >
 
                             <Border Margin="10,0,5,5" Background="White" VerticalAlignment="Center" BorderBrush="#999" BorderThickness="1">
                                 <TextBox x:Name="Search" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  FontSize="12" VerticalAlignment="Center" Height="22" 
@@ -336,7 +336,7 @@
                             </Border>
 
 
-                            <TextBlock Visibility="Collapsed" FontSize="12" Foreground="#FFF" FontWeight="Bold" Margin="5,0,0,5" VerticalAlignment="Center" >Search</TextBlock>
+                            <TextBox Visibility="Visible" FontSize="12" FontWeight="Bold" Margin="5,0,0,5" Width="150" HorizontalAlignment="Right"   Name="txtSearch" GotFocus="txtSearch_GotFocus"  Text="Search"  TextChanged="txtSearch_TextChanged"></TextBox>
                             <ToggleButton Margin="5,0,5,5" Style="{StaticResource ToggleButtonStyle}" Focusable="False"  IsChecked="false" x:Name="XmlToggle" Click="XmlToggle_Click"   />
                         </StackPanel>
                     </Grid>
@@ -348,33 +348,44 @@
                             </Grid.ColumnDefinitions>
                             <Grid x:Name="treeEditor" Grid.ColumnSpan="2">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="655*"/>
+                                    <ColumnDefinition Width="89*"/>
+                                    <ColumnDefinition Width="566*"/>
                                     <ColumnDefinition Width="44*"/>
-                                    <ColumnDefinition Width="247*"/>
+                                    <ColumnDefinition Width="174*"/>
+                                    <ColumnDefinition Width="73*"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition />
                                     <RowDefinition />
                                 </Grid.RowDefinitions>
-                                <TreeView  Background="White" Grid.RowSpan="2" BorderThickness="0" x:Name="treeView" FontSize="12" Grid.ColumnSpan="3"
-                                           VirtualizingStackPanel.IsVirtualizing="True"
+
+
+                                <TreeView  Background="White" Grid.RowSpan="2" BorderThickness="0" x:Name="treeView" FontSize="12" Grid.ColumnSpan="5"
+                                           VirtualizingStackPanel.IsVirtualizing="False"
                                            VirtualizingStackPanel.VirtualizationMode="Recycling"
-                                           ItemContainerStyle="{StaticResource TreeViewExpandAll}">
+                                           ItemContainerStyle="{StaticResource TreeViewExpandAll}" Margin="0,0,0.4,0.4" >
                                     <TreeView.ItemTemplate>
                                         <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBox Background="Transparent" BorderThickness="0" Text="{Binding Name, Mode=OneTime}" IsReadOnly="True" Foreground="#FF9A07AC" TextWrapping="Wrap" />
-                                                <TextBox Background="Transparent" BorderThickness="0" Foreground="Blue" Text="{Binding Value}" IsReadOnly="True" TextWrapping="Wrap" />
-                                                <TextBox Background="Transparent" BorderThickness="0" Foreground="Red" Text="{Binding AttributesString, Mode=OneTime}" IsReadOnly="True" TextWrapping="Wrap" />
+                                                <TextBlock Background="Transparent"  Text="{Binding Name, Mode=OneTime}" Foreground="#FF9A07AC" TextWrapping="Wrap" />
+                                                <TextBlock Background="Transparent" Foreground="Blue" Text="{Binding Value}" TextWrapping="Wrap" />
+                                                <TextBlock Background="Transparent"  Foreground="Red" Text="{Binding AttributesString, Mode=OneTime}"  TextWrapping="Wrap" />
                                             </StackPanel>
                                         </HierarchicalDataTemplate>
                                     </TreeView.ItemTemplate>
+                                    <TreeView.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Collpase All" Name="treeCollapseAll"  Click="treeCollapseAll_Click" />
+                                            <MenuItem Header="Expand All" Name="treeExpandAll"  Click="treeExpandAll_Click" Visibility="Collapsed" />
+                                        </ContextMenu>
+                                    </TreeView.ContextMenu>
+
                                 </TreeView>
-                                <DataGrid Grid.Row="1" BorderThickness="0,1,0,0" x:Name="logDataGrid" Visibility="Collapsed" FontSize="12" Grid.ColumnSpan="3" />
+                                <DataGrid Grid.Row="1" BorderThickness="0,1,0,0" x:Name="logDataGrid" Visibility="Collapsed" FontSize="12" Grid.ColumnSpan="5" Margin="0,0.4,0.4,0.4" />
                             </Grid>
                             <avalonEdit:TextEditor Visibility="Hidden" xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit" Name="responceEditor" 
                                                    HorizontalScrollBarVisibility="Disabled" WordWrap="True" VerticalScrollBarVisibility="Auto" SyntaxHighlighting="XML"
-                                                   FontSize="12" Grid.ColumnSpan="2"
+                                                   FontSize="12" Grid.ColumnSpan="2" 
                                                    />
                             <Controls:ProgressRing x:Name="ProgressDisplay" Visibility="Collapsed" Foreground="#6600FF00" IsActive="True" Margin="443,139,284.304,139" />
 
