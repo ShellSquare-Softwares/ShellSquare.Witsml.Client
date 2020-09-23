@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Rendering;
+using ICSharpCode.AvalonEdit.Search;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,14 +40,20 @@ namespace ShellSquare.Witsml.Client
         private TabHeaderControl m_TabHeader;
         private bool m_ProgrammaticallyChanging = false;
         private bool m_ValueTextBoxFocused = false;
-        public string ViewDeterminant = "T";//T stands for Tree View and X stands for XML view.X FOR UNKNOWN TYPE
+        public string ViewDeterminant = "T";//T stands for Tree View and X stands for XML view.U FOR UNKNOWN TYPE
 
+
+        private readonly SearchPanel searchPanel;
         public WITSMLControl(TabHeaderControl tabHeader)
         {
             m_TabHeader = tabHeader;
             InitializeComponent();
             LoadPreference();
             LoadTemplateList();
+
+            searchPanel = SearchPanel.Install(responceEditor);
+
+
         }
 
         private void LoadTemplateList()
@@ -303,7 +312,7 @@ namespace ShellSquare.Witsml.Client
             string request = requestEditor.Text;
             LoadRequestGrid(request);
 
-            if(request == requestEditor.Text)
+            if (request == requestEditor.Text)
             {
                 timer.Stop();
             }
@@ -351,7 +360,7 @@ namespace ShellSquare.Witsml.Client
             {
                 requestGrid.ItemsSource = RequestXmlToGrid(request);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 DisplayError($"Failed with the message: {ex.Message}");
             }
@@ -382,7 +391,8 @@ namespace ShellSquare.Witsml.Client
                 m_DelayFlagUpdate = new DispatcherTimer();
                 m_DelayFlagUpdate.Interval = TimeSpan.FromMilliseconds(200);
 
-                m_DelayFlagUpdate.Tick += (s, e) => {
+                m_DelayFlagUpdate.Tick += (s, e) =>
+                {
                     var timer = s as DispatcherTimer;
                     if (timer == null)
                     {
@@ -391,9 +401,9 @@ namespace ShellSquare.Witsml.Client
                     timer.Stop();
 
 
-                    m_ProgrammaticallyChanging = false; 
-                
-                
+                    m_ProgrammaticallyChanging = false;
+
+
                 };
             }
             m_DelayFlagUpdate.Stop();
@@ -663,7 +673,7 @@ namespace ShellSquare.Witsml.Client
 
             treeView.ItemsSource = nodeList;
 
-            
+
         }
 
         private void SaveToPreference()
@@ -725,7 +735,6 @@ namespace ShellSquare.Witsml.Client
                 Value = message
             };
             result.Add(witsmlNode);
-
             treeView.ItemsSource = result;
 
         }
@@ -1134,7 +1143,7 @@ namespace ShellSquare.Witsml.Client
             //    txtSearch.Text = "Search";
             //    return;
             //}
-            
+
             if (txtSearch.Text.Trim() == "Search")
             {
                 txtSearch.Clear();
@@ -1144,7 +1153,7 @@ namespace ShellSquare.Witsml.Client
 
         private void treeCollapseAll_Click(object sender, RoutedEventArgs e)
         {
-    
+
             treeExpandAll.Visibility = Visibility.Visible;
             treeCollapseAll.Visibility = Visibility.Collapsed;
             treeView.SetExpansion(isExpanded: false);
@@ -1162,7 +1171,7 @@ namespace ShellSquare.Witsml.Client
                 if (item.HasItems)
                     CollapseTreeviewItems(item);
             }
-           
+
         }
 
         private void treeExpandAll_Click(object sender, RoutedEventArgs e)
@@ -1175,15 +1184,34 @@ namespace ShellSquare.Witsml.Client
         private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             //TreeViewItem tv = obj as TreeViewItem;
-            if (ViewDeterminant == "T" )
+            if (ViewDeterminant == "T")
             {
-               if( this.treeView!=null )
-                FindControlItem(this.treeView);
+                if (this.treeView != null)
+                    FindControlItem(this.treeView);
+            }
+
+            if (ViewDeterminant == "X")
+            {
+                    
+                    findIteminAvalon();
             }
             //FindControlItem(VisualTreeHelper.GetChild(obj as DependencyObject, i));
         }
 
-
+        private void findIteminAvalon()
+        {
+            searchPanel.SearchPattern = txtSearch.Text;
+            searchPanel.Open();
+            searchPanel.Visibility = Visibility.Collapsed;
+            searchPanel.Reactivate();
+            
+            //responceEditor.TextArea.TextView.LineTransformers.Add(new ColorizeAvalonEdit(txtSearch.Text));
+            //responceEditor.TextArea.SelectionChanged += textEditor_TextArea_SelectionChanged;
+        }
+        void textEditor_TextArea_SelectionChanged(object sender, EventArgs e)
+        {
+            this.responceEditor.TextArea.TextView.Redraw();
+        }
         public void FindControlItem(DependencyObject obj)
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
@@ -1224,18 +1252,13 @@ namespace ShellSquare.Witsml.Client
                             Run runx = new Run(item);
                             runx.Background = Brushes.LightBlue;
                             tb.Inlines.Add(runx);
-
-
-                            ////Expand that node here.
-                            ///
-
                         }
                         else
                         {
                             tb.Inlines.Add(item);
                         }
                     }
-                  // return;
+                    // return;
                 }
                 else
                 {
@@ -1337,5 +1360,81 @@ namespace ShellSquare.Witsml.Client
 
         static TreeViewItem ContainerFromItem(ItemsControl parent, object item) =>
           (TreeViewItem)parent.ItemContainerGenerator.ContainerFromItem(item);
+    }
+
+
+    public class ColorizeAvalonEdit : DocumentColorizingTransformer
+    {
+        private readonly string _selectedText;
+
+        public ColorizeAvalonEdit(string selectedText)
+        {
+            _selectedText = selectedText;
+        }
+        int start = 0;
+        protected override void ColorizeLine(DocumentLine line)
+        {
+            int lineStartOffset = line.Offset;
+            string text = CurrentContext.Document.GetText(line);
+            
+            int index;
+
+            if (_selectedText.Trim().Length != 0)
+            {
+
+                while ((index = text.IndexOf(_selectedText, start, StringComparison.Ordinal)) >= 0)
+                {
+                    base.ChangeLinePart(
+                        lineStartOffset + index, // startOffset
+                        lineStartOffset + index+5 , // endOffset
+                        (VisualLineElement element) =>
+                        {
+                            // This lambda gets called once for every VisualLineElement
+                            // between the specified offsets.
+                            Typeface tf = element.TextRunProperties.Typeface;
+                            // Replace the typeface with a modified version of
+                            // the same typeface
+                            element.TextRunProperties.SetTypeface(new Typeface(
+                                    tf.FontFamily,
+                                    FontStyles.Italic,
+                                    FontWeights.Bold,
+                                    tf.Stretch
+                                ));
+                        });
+                    start = index + 1; // search for next occurrence
+                }
+            }
+        }
+    }
+    public class MarkSameWord : DocumentColorizingTransformer
+    {
+        private readonly string _selectedText;
+
+        public MarkSameWord(string selectedText)
+        {
+            _selectedText = selectedText;
+        }
+
+        protected override void ColorizeLine(DocumentLine line)
+        {
+            if (string.IsNullOrEmpty(_selectedText))
+            {
+                return;
+            }
+
+            int lineStartOffset = line.Offset;
+            string text = CurrentContext.Document.GetText(line);
+            int start = 0;
+            int index;
+
+            while ((index = text.IndexOf(_selectedText, start, StringComparison.Ordinal)) >= 0)
+            {
+                ChangeLinePart(
+                  lineStartOffset + index, // startOffset
+                  lineStartOffset + index + _selectedText.Length, // endOffset
+                  element => element.TextRunProperties.SetBackgroundBrush(Brushes.LightSkyBlue));
+                start = index + 1; // search for next occurrence
+            }
+        }
     }
 }
