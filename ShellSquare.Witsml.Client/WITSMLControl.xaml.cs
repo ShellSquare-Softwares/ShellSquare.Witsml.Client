@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Rendering;
+using ICSharpCode.AvalonEdit.Search;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,12 +12,14 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -36,13 +41,20 @@ namespace ShellSquare.Witsml.Client
         private bool m_ProgrammaticallyChanging = false;
         private bool m_ValueTextBoxFocused = false;
         private List<WitsmlElement> m_WitsmlElement;
+        public string ViewDeterminant = "T";//T stands for Tree View and X stands for XML view.U FOR UNKNOWN TYPE
 
+
+        private readonly SearchPanel searchPanel;
         public WITSMLControl(TabHeaderControl tabHeader)
         {
             m_TabHeader = tabHeader;
             InitializeComponent();
             LoadPreference();
             LoadTemplateList();
+
+            searchPanel = SearchPanel.Install(responceEditor);
+
+
         }
 
         private void LoadTemplateList()
@@ -476,15 +488,12 @@ namespace ShellSquare.Witsml.Client
                     }
                 }
             }
-
-
             foreach (var item in element.Elements())
             {
                 int l = level + 1;
                 var r = ParseRequest(item, child, newPath, l);
                 result.AddRange(r);
             }
-
             return result;
 
         }
@@ -563,7 +572,7 @@ namespace ShellSquare.Witsml.Client
             string request = requestEditor.Text;
             LoadRequestGrid(request);
 
-            if(request == requestEditor.Text)
+            if (request == requestEditor.Text)
             {
                 timer.Stop();
             }
@@ -611,7 +620,7 @@ namespace ShellSquare.Witsml.Client
             {                
                 RequestXmlToGrid(request);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 DisplayError($"Failed with the message: {ex.Message}");
             }
@@ -642,7 +651,8 @@ namespace ShellSquare.Witsml.Client
                 m_DelayFlagUpdate = new DispatcherTimer();
                 m_DelayFlagUpdate.Interval = TimeSpan.FromMilliseconds(200);
 
-                m_DelayFlagUpdate.Tick += (s, e) => {
+                m_DelayFlagUpdate.Tick += (s, e) =>
+                {
                     var timer = s as DispatcherTimer;
                     if (timer == null)
                     {
@@ -651,9 +661,9 @@ namespace ShellSquare.Witsml.Client
                     timer.Stop();
 
 
-                    m_ProgrammaticallyChanging = false; 
-                
-                
+                    m_ProgrammaticallyChanging = false;
+
+
                 };
             }
             m_DelayFlagUpdate.Stop();
@@ -922,6 +932,8 @@ namespace ShellSquare.Witsml.Client
             nodeList.Add(witsmlNode);
 
             treeView.ItemsSource = nodeList;
+
+
         }
 
         private void SaveToPreference()
@@ -983,7 +995,6 @@ namespace ShellSquare.Witsml.Client
                 Value = message
             };
             result.Add(witsmlNode);
-
             treeView.ItemsSource = result;
 
         }
@@ -991,6 +1002,7 @@ namespace ShellSquare.Witsml.Client
         private void DisplayMessage(string message)
         {
             responceEditor.Text = message;
+
             var result = new List<WitsmlNode>();
             WitsmlNode witsmlNode = new WitsmlNode()
             {
@@ -1351,16 +1363,17 @@ namespace ShellSquare.Witsml.Client
         {
             if (XmlToggle.IsChecked == false)
             {
+                ViewDeterminant = "T";//TREE
                 responceEditor.Visibility = Visibility.Collapsed;
                 treeEditor.Visibility = Visibility.Visible;
             }
             else
             {
+                ViewDeterminant = "X";//XML
                 responceEditor.Visibility = Visibility.Visible;
                 treeEditor.Visibility = Visibility.Collapsed;
             }
         }
-
         private void EnableTree_Click(object sender, RoutedEventArgs e)
         {
             if (!EnableTree.IsChecked.Value)
@@ -1369,7 +1382,6 @@ namespace ShellSquare.Witsml.Client
                 responceEditor.Visibility = Visibility.Visible;
                 treeEditor.Visibility = Visibility.Collapsed;
                 XmlToggle.Visibility = Visibility.Collapsed;
-
             }
             else
             {
@@ -1380,6 +1392,141 @@ namespace ShellSquare.Witsml.Client
 
                 XDocument doc = XDocument.Parse(responceEditor.Text);
                 LoadResponceGrid(doc);
+            }
+        }
+
+
+        private void txtSearch_GotFocus(object sender, RoutedEventArgs e)
+        {
+            //if (txtSearch.Text.Trim() == "") 
+            //{
+            //    txtSearch.Text = "Search";
+            //    return;
+            //}
+
+            if (txtSearch.Text.Trim() == "Search")
+            {
+                txtSearch.Clear();
+                return;
+            }
+        }
+
+        private void treeCollapseAll_Click(object sender, RoutedEventArgs e)
+        {
+
+            treeExpandAll.Visibility = Visibility.Visible;
+            treeCollapseAll.Visibility = Visibility.Collapsed;
+            treeView.SetExpansion(isExpanded: false);
+
+
+        }
+
+        public void CollapseTreeviewItems(TreeViewItem Item)
+        {
+            Item.IsExpanded = false;
+            foreach (TreeViewItem item in Item.Items)
+            {
+                item.IsExpanded = false;
+
+                if (item.HasItems)
+                    CollapseTreeviewItems(item);
+            }
+
+        }
+
+        private void treeExpandAll_Click(object sender, RoutedEventArgs e)
+        {
+            treeCollapseAll.Visibility = Visibility.Visible;
+            treeExpandAll.Visibility = Visibility.Collapsed;
+            treeView.SetExpansion(isExpanded: true);
+        }
+
+        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            //TreeViewItem tv = obj as TreeViewItem;
+            if (ViewDeterminant == "T")
+            {
+                if (this.treeView != null)
+                    FindControlItem(this.treeView);
+            }
+
+            if (ViewDeterminant == "X")
+            {
+                    
+                    findIteminAvalon();
+            }
+            //FindControlItem(VisualTreeHelper.GetChild(obj as DependencyObject, i));
+        }
+
+        private void findIteminAvalon()
+        {
+            searchPanel.SearchPattern = txtSearch.Text;
+            searchPanel.Open();
+            searchPanel.Visibility = Visibility.Collapsed;
+            searchPanel.Reactivate();
+            
+            //responceEditor.TextArea.TextView.LineTransformers.Add(new ColorizeAvalonEdit(txtSearch.Text));
+            //responceEditor.TextArea.SelectionChanged += textEditor_TextArea_SelectionChanged;
+        }
+        void textEditor_TextArea_SelectionChanged(object sender, EventArgs e)
+        {
+            this.responceEditor.TextArea.TextView.Redraw();
+        }
+        public void FindControlItem(DependencyObject obj)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                //ListViewItem lv = obj as ListViewItem;
+                //DataGridCell dg = obj as DataGridCell;
+                TreeViewItem tv = obj as TreeViewItem;
+                if (tv != null)
+                {
+                    HighlightText(tv);
+                }
+                FindControlItem(VisualTreeHelper.GetChild(obj as DependencyObject, i));
+            }
+        }
+
+
+        private void HighlightText(Object itx)
+        {
+            if (itx != null)
+            {
+                if (itx is TextBlock)
+                {
+                    Regex regex = new Regex("(" + txtSearch.Text + ")", RegexOptions.IgnoreCase);
+                    TextBlock tb = itx as TextBlock;
+                    if (txtSearch.Text.Length == 0)
+                    {
+                        string str = tb.Text;
+                        tb.Inlines.Clear();
+                        tb.Inlines.Add(str);
+                        return;
+                    }
+                    string[] substrings = regex.Split(tb.Text);
+                    tb.Inlines.Clear();
+                    foreach (var item in substrings)
+                    {
+                        if (regex.Match(item).Success)
+                        {
+                            Run runx = new Run(item);
+                            runx.Background = Brushes.LightBlue;
+                            tb.Inlines.Add(runx);
+                        }
+                        else
+                        {
+                            tb.Inlines.Add(item);
+                        }
+                    }
+                    // return;
+                }
+                else
+                {
+                    for (int i = 0; i < VisualTreeHelper.GetChildrenCount(itx as DependencyObject); i++)
+                    {
+                        HighlightText(VisualTreeHelper.GetChild(itx as DependencyObject, i));
+                    }
+                }
             }
         }
 
@@ -1437,14 +1584,117 @@ namespace ShellSquare.Witsml.Client
         //    }
         //}
 
+    }
+
+    public static class TreeViewExtensions
+    {
+        public static void SetExpansion(this TreeView treeView, bool isExpanded) =>
+          SetExpansion((ItemsControl)treeView, isExpanded);
+
+        static void SetExpansion(ItemsControl parent, bool isExpanded)
+        {
+            if (parent is TreeViewItem tvi)
+                tvi.IsExpanded = isExpanded;
+            if (parent != null)
+            {
+                if (parent.HasItems)
+                    foreach (var item in parent.Items.Cast<object>()
+                  .Select(i => GetTreeViewItem(parent, i, isExpanded)))
+                        SetExpansion(item, isExpanded);
+            }
+        }
+        static TreeViewItem GetTreeViewItem(
+          ItemsControl parent, object item, bool isExpanded)
+        {
+            if (item is TreeViewItem tvi)
+                return tvi;
+
+            var result = ContainerFromItem(parent, item);
+            if (result == null && isExpanded)
+            {
+                parent.UpdateLayout();
+                result = ContainerFromItem(parent, item);
+            }
+            return result;
+        }
+
+        static TreeViewItem ContainerFromItem(ItemsControl parent, object item) =>
+          (TreeViewItem)parent.ItemContainerGenerator.ContainerFromItem(item);
+    }
 
 
+    public class ColorizeAvalonEdit : DocumentColorizingTransformer
+    {
+        private readonly string _selectedText;
 
+        public ColorizeAvalonEdit(string selectedText)
+        {
+            _selectedText = selectedText;
+        }
+        int start = 0;
+        protected override void ColorizeLine(DocumentLine line)
+        {
+            int lineStartOffset = line.Offset;
+            string text = CurrentContext.Document.GetText(line);
+            
+            int index;
 
+            if (_selectedText.Trim().Length != 0)
+            {
 
+                while ((index = text.IndexOf(_selectedText, start, StringComparison.Ordinal)) >= 0)
+                {
+                    base.ChangeLinePart(
+                        lineStartOffset + index, // startOffset
+                        lineStartOffset + index+5 , // endOffset
+                        (VisualLineElement element) =>
+                        {
+                            // This lambda gets called once for every VisualLineElement
+                            // between the specified offsets.
+                            Typeface tf = element.TextRunProperties.Typeface;
+                            // Replace the typeface with a modified version of
+                            // the same typeface
+                            element.TextRunProperties.SetTypeface(new Typeface(
+                                    tf.FontFamily,
+                                    FontStyles.Italic,
+                                    FontWeights.Bold,
+                                    tf.Stretch
+                                ));
+                        });
+                    start = index + 1; // search for next occurrence
+                }
+            }
+        }
+    }
+    public class MarkSameWord : DocumentColorizingTransformer
+    {
+        private readonly string _selectedText;
 
+        public MarkSameWord(string selectedText)
+        {
+            _selectedText = selectedText;
+        }
 
+        protected override void ColorizeLine(DocumentLine line)
+        {
+            if (string.IsNullOrEmpty(_selectedText))
+            {
+                return;
+            }
 
+            int lineStartOffset = line.Offset;
+            string text = CurrentContext.Document.GetText(line);
+            int start = 0;
+            int index;
 
+            while ((index = text.IndexOf(_selectedText, start, StringComparison.Ordinal)) >= 0)
+            {
+                ChangeLinePart(
+                  lineStartOffset + index, // startOffset
+                  lineStartOffset + index + _selectedText.Length, // endOffset
+                  element => element.TextRunProperties.SetBackgroundBrush(Brushes.LightSkyBlue));
+                start = index + 1; // search for next occurrence
+            }
+        }
     }
 }
