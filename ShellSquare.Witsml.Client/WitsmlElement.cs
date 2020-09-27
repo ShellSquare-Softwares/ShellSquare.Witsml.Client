@@ -9,6 +9,7 @@ namespace ShellSquare.Witsml.Client
 {
     public class WitsmlElement 
     {
+        public bool Inuse { get; set; } = false;
         public bool Selected { get; set; }
         public string Path { get; set; }
         public bool IsAttribute { get; set; }

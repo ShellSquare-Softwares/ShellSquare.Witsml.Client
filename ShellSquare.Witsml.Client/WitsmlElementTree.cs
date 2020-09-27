@@ -95,5 +95,45 @@ namespace ShellSquare.Witsml.Client
         }
 
 
+        public void AddToPath(string path, WitsmlElementTree w)
+        {
+            if (this.Element.Path == path)
+            {
+                string elementName = w.Element.Name;
+                int index = Children.FindLastIndex(o => o.Element.Name == elementName);
+
+                if (index == -1)
+                {
+                    Children.Add(w);
+                }
+                else
+                {
+                    Children.Insert(index + 1, w);
+                }
+
+                return;
+            }
+
+            foreach (var child in Children)
+            {
+                child.AddToPath(path, w);
+            }
+        }
+
+        public void AddToPath(string path, WitsmlElement a)
+        {
+            if(this.Element.Path == path)
+            {
+                Attributes.Add(a);
+                return;
+            }
+
+            foreach (var child in Children)
+            {
+                child.AddToPath(path, a);
+            }
+        }
+
+
     }
 }

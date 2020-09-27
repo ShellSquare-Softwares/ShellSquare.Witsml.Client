@@ -152,5 +152,11 @@ namespace ShellSquare.Witsml.Client
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+
+        internal void Notify()
+        {
+            OnPropertyChanged("Selected");
+            OnPropertyChanged("Value");
+        }
     }
 }

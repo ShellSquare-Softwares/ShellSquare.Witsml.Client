@@ -35,6 +35,7 @@ namespace ShellSquare.Witsml.Client
         private TabHeaderControl m_TabHeader;
         private bool m_ProgrammaticallyChanging = false;
         private bool m_ValueTextBoxFocused = false;
+        private List<WitsmlElement> m_WitsmlElement;
 
         public WITSMLControl(TabHeaderControl tabHeader)
         {
@@ -71,7 +72,7 @@ namespace ShellSquare.Witsml.Client
             {
                 m_ProgrammaticallyChanging = true;
                 requestGrid.ItemsSource = LoadFromSchema(template.ToLower());
-                requestEditor.Text = RequestGridToXml();
+                requestEditor.Text = "";
                 m_ProgrammaticallyChanging = false;
             }
             catch (Exception ex)
@@ -110,12 +111,13 @@ namespace ShellSquare.Witsml.Client
                 WitsmlElementTree.Root = null;
             }
 
+            m_WitsmlElement = results;
             WitsmlElementStore.Elements.Clear();
-            List<GridNode> nodes = new List<GridNode>();
-            foreach (var w in results)
+            List<GridNode> nodes = new List<GridNode>();            
+            foreach (var w in m_WitsmlElement)
             {
                 GridNode node = new GridNode(w);
-                node.Selected = true;
+                node.Selected = false;
                 nodes.Add(node);
                 WitsmlElementStore.Elements.Add(w.Path, w);
             }
@@ -151,26 +153,282 @@ namespace ShellSquare.Witsml.Client
 
             return result;
         }
-        private List<GridNode> RequestXmlToGrid(string request)
+        private void RequestXmlToGrid(string request)
         {
-            WitsmlElementTree tempParent = new WitsmlElementTree(null);
+            foreach (var we in m_WitsmlElement)
+            {
+                we.Selected = false;
+                we.Inuse = false;
+                we.Value = "";
+
+            }
 
             XElement element = XElement.Parse(request);
-            List<GridNode> result = ParseRequest(element, tempParent, "");
+            ParseRequest(element, "", "", out bool hasNewItem);
 
-            if (tempParent.Children.Count > 0)
+            if (hasNewItem)
             {
-                WitsmlElementTree.Root = tempParent.Children[0];
-                WitsmlElementTree.Root.Namespace = GetNameSpace();
+                List<GridNode> nodes = new List<GridNode>();
+                foreach (var w in m_WitsmlElement)
+                {
+                    GridNode node = new GridNode(w);
+                    nodes.Add(node);
+                }
+
+                requestGrid.ItemsSource = nodes;
             }
             else
             {
-                WitsmlElementTree.Root = null;
+                var nodes = requestGrid.ItemsSource as List<GridNode>;
+                foreach (var n in nodes)
+                {
+                    n.Notify();
+                }
+            }
+        }
+
+        
+        private void ParseRequest(XElement element, string path, string parentPath, out bool hasNewItem, int level = 0)
+        {
+            hasNewItem = false;
+            string name = element.Name.LocalName.ToString();
+            string newPath = $"{path}\\{name}";
+            string elementPath = $"{parentPath}\\{name}";
+
+            if (!WitsmlElementStore.Elements.TryGetValue(newPath, out WitsmlElement w))
+            {
+                DisplayError($"Not supported element {newPath}");
+                return;
             }
 
-            return result;
+            if (w.Inuse)
+            {
+                if(TryGetNestedElement(elementPath, out WitsmlElement wn, out int count))
+                {
+                    w = wn;
+                    elementPath = w.Path;
+                }
+                else
+                {
+                    w = w.DeepCopy();                    
+                    hasNewItem = true;
+                    w.Path = $"{elementPath} {count}";
+                    WitsmlElementStore.Elements.Add(w.Path, w);
+                    WitsmlElementTree.Root.AddToPath(parentPath, new WitsmlElementTree(w));
+                    AddNestedElement(w, parentPath, w.Name);
+                    elementPath = w.Path;
+                }
+            }
+
+            w.Inuse = true;
+
+            if (element.HasElements == false)
+            {
+                if (element.Value != "")
+                {
+                    w.Value = element.Value;
+                }
+            }
+
+            w.Selected = true;
+
+
+            if (level > 0)
+            {
+                foreach (var item in element.Attributes())
+                {
+                    
+
+                    string attributeName = item.Name.ToString();
+                    var attrPath = $"{newPath}\\@{attributeName}";
+
+                    if (WitsmlElementStore.Elements.TryGetValue(attrPath, out w))
+                    {
+                        if (w.Inuse)
+                        {
+                            if (TryGetNestedAttribute(elementPath, attributeName, out WitsmlElement wn))
+                            {
+                                w = wn;
+                            }
+                            else
+                            {
+                                w = w.DeepCopy();
+                                hasNewItem = true;
+                                w.Path = $"{elementPath}\\@{attributeName}";
+                                WitsmlElementStore.Elements.Add(w.Path, w);
+                                WitsmlElementTree.Root.AddToPath(elementPath, w);
+                                AddNestedAttribute(w, elementPath, w.Name);
+                            }
+                        }
+
+                        w.Inuse = true;
+
+                        w.Selected = true;
+                        w.Value = item.Value;
+                    }
+                    else
+                    {
+                        DisplayError($"Not supported attribute {newPath}");
+                    }
+                }
+            }
+
+
+            foreach (var item in element.Elements())
+            {
+                int l = level + 1;
+                ParseRequest(item, newPath, elementPath, out bool newItem, l);
+
+                if(newItem)
+                {
+                    hasNewItem = true;
+                }
+            }
         }
-        private List<GridNode> ParseRequest(XElement element, WitsmlElementTree parent, string path, int level = 0)
+
+        
+
+        private bool TryGetNestedElement(string path, out WitsmlElement w, out int itemsCount)
+        {
+            itemsCount = 1;
+
+            while (true)
+            {
+                string tempPath = $"{path} {itemsCount}";
+                if (!WitsmlElementStore.Elements.TryGetValue(tempPath, out w))
+                {
+                    w = null;
+                    return false;
+                }
+                else
+                {
+                    if (w.Inuse == false)
+                    {
+                        return true;
+                    }
+                }
+
+                itemsCount = itemsCount + 1;
+            }
+        }
+
+
+        private bool TryGetNestedAttribute(string path, string attributeName, out WitsmlElement w)
+        {
+            string tempPath = $"{path}\\@{attributeName}";
+            if (!WitsmlElementStore.Elements.TryGetValue(tempPath, out w))
+            {
+                w = null;
+                return false;
+            }
+            else
+            {
+                if (w.Inuse == false)
+                {
+                    return true;
+                }
+            }
+
+            w = null;
+            return false;
+        }
+
+
+        private void AddNestedElement(WitsmlElement w, string originalPath, string elementName)
+        {
+            string searchPath = originalPath;
+
+            var bro = m_WitsmlElement.Where(p => p.Path == searchPath).FirstOrDefault();
+            int index = m_WitsmlElement.IndexOf(bro);
+
+            int itemIndex = m_WitsmlElement.Count;
+
+            for (int i = index + 1; i < m_WitsmlElement.Count; i++)
+            {
+                var el = m_WitsmlElement[i];
+
+                if(el.Level <= bro.Level)
+                {
+                    if (el.Name != elementName)
+                    {
+                        itemIndex = i;
+                        break;
+                    }
+                }
+                else if (el.Name == elementName)
+                {
+                    bool found = false;
+                    for (int j = i + 1; j < m_WitsmlElement.Count; j++)
+                    {
+                        var child = m_WitsmlElement[j];
+                        if(el.Level == child.Level && child.Name != elementName)
+                        {
+                            found = true;
+                            itemIndex = j;
+                            break;
+                        }
+                    }
+
+                    if (found)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            m_WitsmlElement.Insert(itemIndex, w);
+        }
+
+
+        private void AddNestedAttribute(WitsmlElement w, string originalPath, string attributeName)
+        {
+            string searchPath = originalPath;
+
+            var bro = m_WitsmlElement.Where(p => p.Path == searchPath).FirstOrDefault();
+            int index = m_WitsmlElement.IndexOf(bro);
+
+            int itemIndex = m_WitsmlElement.Count;
+
+            for (int i = index + 1; i < m_WitsmlElement.Count; i++)
+            {
+                var el = m_WitsmlElement[i];
+
+                if (el.Level <= bro.Level)
+                {
+                    if (el.Name != attributeName)
+                    {
+                        itemIndex = i;
+                        break;
+                    }
+                }
+                else if (el.Name == attributeName)
+                {
+                    bool found = false;
+                    for (int j = i + 1; j < m_WitsmlElement.Count; j++)
+                    {
+                        var child = m_WitsmlElement[j];
+                        if (el.Level == child.Level && child.Name != attributeName)
+                        {
+                            found = true;
+                            itemIndex = j;
+                            break;
+                        }
+                    }
+
+                    if (found)
+                    {
+                        break;
+                    }
+                }
+            }
+
+           m_WitsmlElement.Insert(itemIndex, w);
+        }
+
+
+
+        /*
+         private List<GridNode> ParseRequest(XElement element, WitsmlElementTree parent, string path, int level = 0)
         {
             List<GridNode> result = new List<GridNode>();
 
@@ -230,6 +488,8 @@ namespace ShellSquare.Witsml.Client
             return result;
 
         }
+        */
+
         public static string PrettifyXML(string xml)
         {
             string result;
@@ -348,8 +608,8 @@ namespace ShellSquare.Witsml.Client
         private void LoadRequestGrid(string request)
         {
             try
-            {
-                requestGrid.ItemsSource = RequestXmlToGrid(request);
+            {                
+                RequestXmlToGrid(request);
             }
             catch(Exception ex)
             {
@@ -1177,14 +1437,14 @@ namespace ShellSquare.Witsml.Client
         //    }
         //}
 
-        
 
 
 
-        
 
-       
 
-        
+
+
+
+
     }
 }
