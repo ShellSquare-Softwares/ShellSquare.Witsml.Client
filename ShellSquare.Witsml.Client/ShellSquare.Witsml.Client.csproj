@@ -75,7 +75,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ColorizeAvalonEdit.cs" />
     <Compile Include="GridNode.cs" />
+    <Compile Include="MarkSameWord.cs" />
     <Compile Include="OptionSelection.xaml.cs">
       <DependentUpon>OptionSelection.xaml</DependentUpon>
     </Compile>
@@ -90,6 +92,7 @@
     <Compile Include="TabItemHeader.xaml.cs">
       <DependentUpon>TabItemHeader.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TreeViewExtensions.cs" />
     <Compile Include="WITSMLControl.xaml.cs">
       <DependentUpon>WITSMLControl.xaml</DependentUpon>
     </Compile>

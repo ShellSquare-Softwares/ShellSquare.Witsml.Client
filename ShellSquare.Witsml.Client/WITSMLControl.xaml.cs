@@ -437,68 +437,6 @@ namespace ShellSquare.Witsml.Client
            m_WitsmlElement.Insert(itemIndex, w);
         }
 
-
-
-        /*
-         private List<GridNode> ParseRequest(XElement element, WitsmlElementTree parent, string path, int level = 0)
-        {
-            List<GridNode> result = new List<GridNode>();
-
-            string name = element.Name.LocalName.ToString();
-            string newPath = $"{path}\\{name}";
-
-            if (!WitsmlElementStore.Elements.TryGetValue(newPath, out WitsmlElement w))
-            {
-                return result;
-            }
-            else
-            {
-                w = w.DeepCopy();
-            }
-
-            if (element.HasElements == false)
-            {
-                if (element.Value != "")
-                {
-                    w.Value = element.Value;
-                }
-            }
-
-            w.Selected = true;
-
-            GridNode node = new GridNode(w);
-            result.Add(node);
-
-            WitsmlElementTree child = new WitsmlElementTree(w);
-            parent.Children.Add(child);
-
-            if (level > 0)
-            {
-                foreach (var item in element.Attributes())
-                {
-                    var attrPath = $"{newPath}\\@{item.Name}";
-                    if (WitsmlElementStore.Elements.TryGetValue(attrPath, out w))
-                    {
-                        w = w.DeepCopy();
-                        w.Selected = true;
-                        w.Value = item.Value;
-                        GridNode attribute = new GridNode(w);
-                        result.Add(attribute);
-                        child.Attributes.Add(w);
-                    }
-                }
-            }
-            foreach (var item in element.Elements())
-            {
-                int l = level + 1;
-                var r = ParseRequest(item, child, newPath, l);
-                result.AddRange(r);
-            }
-            return result;
-
-        }
-        */
-
         public static string PrettifyXML(string xml)
         {
             string result;
@@ -607,8 +545,6 @@ namespace ShellSquare.Witsml.Client
             }
         }
 
-
-
         public void OnValueSelctionClicked(object sender, EventArgs e)
         {
 
@@ -641,7 +577,6 @@ namespace ShellSquare.Witsml.Client
 
             ResetFlag();
         }
-
 
         private void ResetFlag()
         {
@@ -684,7 +619,6 @@ namespace ShellSquare.Witsml.Client
             XNamespace ns = "http://www.witsml.org/schemas/1series";
             return ns;
         }
-
 
         private void RequestGridSelect_Click(object sender, RoutedEventArgs e)
         {
@@ -799,7 +733,6 @@ namespace ShellSquare.Witsml.Client
                 }
             }
         }
-
 
         private void OnValueSelctionClicked(object sender, RoutedEventArgs e)
         {
@@ -1531,170 +1464,11 @@ namespace ShellSquare.Witsml.Client
         }
 
 
-        /********* Not used code *****************************/
-
-
-
-        //private void Search_TextChanged(object sender, TextChangedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        int pointer = 1;
-        //        string searchedText = Search.Text;
-        //        if (responceEditor.Visibility == Visibility.Visible)
-        //        {
-        //            Color backgroundColor = (Color)ColorConverter.ConvertFromString("Yellow");
-        //            Color fontColor = (Color)ColorConverter.ConvertFromString("Black");
-        //            int counter = 1;
-        //            if (searchedText.Length != 0)
-        //            {
-        //                while (counter < 3)
-        //                {
-        //                    int index = responceEditor.Text.ToLower().IndexOf(searchedText.ToLower(), pointer);
-        //                    //if keyword not found
-        //                    if (index == -1)
-        //                    {
-        //                        break;
-        //                    }
-        //                    else
-        //                    {
-        //                        //else TODO
-        //                        responceEditor.Select(index, searchedText.Length);
-        //                        //   to highlight
-        //                        responceEditor.TextArea.SelectionBrush = new SolidColorBrush(backgroundColor);
-        //                        responceEditor.TextArea.SelectionForeground = new SolidColorBrush(fontColor);
-        //                        pointer = index + searchedText.Length;
-        //                        //TODO
-
-        //                    }
-        //                    counter++;
-        //                }
-        //            }
-        //            else
-        //            {
-        //                responceEditor.Select(0, 0);
-        //            }
-
-
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        DisplayError($"<message>Failed with the message: {ex.Message} </message>");
-        //    }
-        //}
-
     }
 
-    public static class TreeViewExtensions
-    {
-        public static void SetExpansion(this TreeView treeView, bool isExpanded) =>
-          SetExpansion((ItemsControl)treeView, isExpanded);
-
-        static void SetExpansion(ItemsControl parent, bool isExpanded)
-        {
-            if (parent is TreeViewItem tvi)
-                tvi.IsExpanded = isExpanded;
-            if (parent != null)
-            {
-                if (parent.HasItems)
-                    foreach (var item in parent.Items.Cast<object>()
-                  .Select(i => GetTreeViewItem(parent, i, isExpanded)))
-                        SetExpansion(item, isExpanded);
-            }
-        }
-        static TreeViewItem GetTreeViewItem(
-          ItemsControl parent, object item, bool isExpanded)
-        {
-            if (item is TreeViewItem tvi)
-                return tvi;
-
-            var result = ContainerFromItem(parent, item);
-            if (result == null && isExpanded)
-            {
-                parent.UpdateLayout();
-                result = ContainerFromItem(parent, item);
-            }
-            return result;
-        }
-
-        static TreeViewItem ContainerFromItem(ItemsControl parent, object item) =>
-          (TreeViewItem)parent.ItemContainerGenerator.ContainerFromItem(item);
-    }
+    
 
 
-    public class ColorizeAvalonEdit : DocumentColorizingTransformer
-    {
-        private readonly string _selectedText;
-
-        public ColorizeAvalonEdit(string selectedText)
-        {
-            _selectedText = selectedText;
-        }
-        int start = 0;
-        protected override void ColorizeLine(DocumentLine line)
-        {
-            int lineStartOffset = line.Offset;
-            string text = CurrentContext.Document.GetText(line);
-            
-            int index;
-
-            if (_selectedText.Trim().Length != 0)
-            {
-
-                while ((index = text.IndexOf(_selectedText, start, StringComparison.Ordinal)) >= 0)
-                {
-                    base.ChangeLinePart(
-                        lineStartOffset + index, // startOffset
-                        lineStartOffset + index+5 , // endOffset
-                        (VisualLineElement element) =>
-                        {
-                            // This lambda gets called once for every VisualLineElement
-                            // between the specified offsets.
-                            Typeface tf = element.TextRunProperties.Typeface;
-                            // Replace the typeface with a modified version of
-                            // the same typeface
-                            element.TextRunProperties.SetTypeface(new Typeface(
-                                    tf.FontFamily,
-                                    FontStyles.Italic,
-                                    FontWeights.Bold,
-                                    tf.Stretch
-                                ));
-                        });
-                    start = index + 1; // search for next occurrence
-                }
-            }
-        }
-    }
-    public class MarkSameWord : DocumentColorizingTransformer
-    {
-        private readonly string _selectedText;
-
-        public MarkSameWord(string selectedText)
-        {
-            _selectedText = selectedText;
-        }
-
-        protected override void ColorizeLine(DocumentLine line)
-        {
-            if (string.IsNullOrEmpty(_selectedText))
-            {
-                return;
-            }
-
-            int lineStartOffset = line.Offset;
-            string text = CurrentContext.Document.GetText(line);
-            int start = 0;
-            int index;
-
-            while ((index = text.IndexOf(_selectedText, start, StringComparison.Ordinal)) >= 0)
-            {
-                ChangeLinePart(
-                  lineStartOffset + index, // startOffset
-                  lineStartOffset + index + _selectedText.Length, // endOffset
-                  element => element.TextRunProperties.SetBackgroundBrush(Brushes.LightSkyBlue));
-                start = index + 1; // search for next occurrence
-            }
-        }
-    }
+   
+    
 }
