@@ -8,7 +8,7 @@ using System.Windows.Forms;
 namespace ShellSquare.Witsml.Client
 {
     public class WitsmlElement 
-    {
+    {        
         public bool Inuse { get; set; } = false;
         public bool Selected { get; set; }
         public string Path { get; set; }
@@ -17,6 +17,7 @@ namespace ShellSquare.Witsml.Client
         public int Level { get; set; }
         public string Name { get; set; }
         public string Value { get; set; } = "";
+        public bool IsNested { get; set; }
         public List<string> Restrictions { get; private set; } = new List<string>();
 
         public WitsmlElement DeepCopy()

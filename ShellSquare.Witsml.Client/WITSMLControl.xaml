@@ -336,7 +336,9 @@
                             </Border>
 
 
-                            <TextBox Visibility="Visible" FontSize="12" FontWeight="Bold" Margin="5,0,0,5" Width="150" HorizontalAlignment="Right"   Name="txtSearch" GotFocus="txtSearch_GotFocus"  Text="Search"  TextChanged="txtSearch_TextChanged"></TextBox>
+                            <TextBox  Visibility="Visible" FontSize="12" FontWeight="Bold" Margin="5,0,0,5" Width="150" 
+                                      HorizontalContentAlignment="Right"
+                                      HorizontalAlignment="Right"   Name="txtSearch" GotFocus="txtSearch_GotFocus"  Text="Search"  TextChanged="txtSearch_TextChanged"></TextBox>
                             <ToggleButton Margin="5,0,5,5" Style="{StaticResource ToggleButtonStyle}" Focusable="False"  IsChecked="false" x:Name="XmlToggle" Click="XmlToggle_Click"   />
                         </StackPanel>
                     </Grid>
@@ -368,7 +370,7 @@
                                         <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Background="Transparent"  Text="{Binding Name, Mode=OneTime}" Foreground="#FF9A07AC" TextWrapping="Wrap" />
-                                                <TextBlock Background="Transparent" Foreground="Blue" Text="{Binding Value}" TextWrapping="Wrap" />
+                                                <TextBlock Background="Transparent" Foreground="Blue" Text="{Binding Value}" TextWrapping="Wrap" Margin="1,0,1,0" />
                                                 <TextBlock Background="Transparent"  Foreground="Red" Text="{Binding AttributesString, Mode=OneTime}"  TextWrapping="Wrap" />
                                             </StackPanel>
                                         </HierarchicalDataTemplate>
@@ -381,7 +383,10 @@
                                     </TreeView.ContextMenu>
 
                                 </TreeView>
-                                <DataGrid Grid.Row="1" BorderThickness="0,1,0,0" x:Name="logDataGrid" Visibility="Collapsed" FontSize="12" Grid.ColumnSpan="5" Margin="0,0.4,0.4,0.4" />
+                                <DataGrid Grid.Row="1" BorderThickness="0,1,0,0" x:Name="logDataGrid" Visibility="Collapsed" FontSize="12" Grid.ColumnSpan="5" Margin="0,0.4,0.4,0.4"
+                                          VirtualizingStackPanel.IsVirtualizing="False"
+                                           VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                          />
                             </Grid>
                             <avalonEdit:TextEditor Visibility="Hidden" xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit" Name="responceEditor" 
                                                    HorizontalScrollBarVisibility="Disabled" WordWrap="True" VerticalScrollBarVisibility="Auto" SyntaxHighlighting="XML"

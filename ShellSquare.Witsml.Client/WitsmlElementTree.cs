@@ -135,5 +135,27 @@ namespace ShellSquare.Witsml.Client
         }
 
 
+        public void RemoveNestedChildren()
+        {
+            var elements = Children.FindAll(e => e.Element.IsNested);
+            foreach (var el in elements)
+            {
+                Children.Remove(el);
+            }
+
+            foreach (var child in Children)
+            {
+                child.RemoveNestedChildren();
+            }
+
+            var attributes = Attributes.FindAll(e => e.IsNested);
+            foreach (var a in attributes)
+            {
+                Attributes.Remove(a);
+            }
+
+        }
+
+
     }
 }

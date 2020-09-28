@@ -167,12 +167,13 @@ namespace ShellSquare.Witsml.Client
         }
         private void RequestXmlToGrid(string request)
         {
+            RemoveNestedElements();
+
             foreach (var we in m_WitsmlElement)
             {
                 we.Selected = false;
                 we.Inuse = false;
                 we.Value = "";
-
             }
 
             XElement element = XElement.Parse(request);
@@ -199,7 +200,18 @@ namespace ShellSquare.Witsml.Client
             }
         }
 
-        
+        private void RemoveNestedElements()
+        {
+            var elements = m_WitsmlElement.FindAll(e => e.IsNested);
+            foreach (var el in elements)
+            {
+                m_WitsmlElement.Remove(el);
+                WitsmlElementStore.Elements.Remove(el.Path);
+            }
+
+            WitsmlElementTree.Root.RemoveNestedChildren();
+        }
+
         private void ParseRequest(XElement element, string path, string parentPath, out bool hasNewItem, int level = 0)
         {
             hasNewItem = false;
@@ -222,7 +234,8 @@ namespace ShellSquare.Witsml.Client
                 }
                 else
                 {
-                    w = w.DeepCopy();                    
+                    w = w.DeepCopy();
+                    w.IsNested = true;
                     hasNewItem = true;
                     w.Path = $"{elementPath} {count}";
                     WitsmlElementStore.Elements.Add(w.Path, w);
@@ -266,6 +279,7 @@ namespace ShellSquare.Witsml.Client
                             {
                                 w = w.DeepCopy();
                                 hasNewItem = true;
+                                w.IsNested = true;
                                 w.Path = $"{elementPath}\\@{attributeName}";
                                 WitsmlElementStore.Elements.Add(w.Path, w);
                                 WitsmlElementTree.Root.AddToPath(elementPath, w);
@@ -992,12 +1006,16 @@ namespace ShellSquare.Witsml.Client
 
                         if (childElement.Name.LocalName.ToLower() == "logdata")
                         {
-                            logDataGrid.Visibility = Visibility.Visible;
-                            Grid.SetRowSpan(treeView, 1);
+                            //logDataGrid.Visibility = Visibility.Visible;
+                            //Grid.SetRowSpan(treeView, 1);
 
-                            DataTable dt = new DataTable();
-                            DisplayLogdata(childElement, ref dt);
-                            logDataGrid.ItemsSource = new DataView(dt);
+                            //DataTable dt = new DataTable();
+                            //DisplayLogdata(childElement, ref dt);
+                            //logDataGrid.ItemsSource = new DataView(dt);
+
+                            var children = GetChildren(childElement);                            
+                            childNode.Children.AddRange(children);
+                            result.Add(childNode);
                         }
                         else
                         {
@@ -1380,7 +1398,9 @@ namespace ShellSquare.Witsml.Client
             if (ViewDeterminant == "T")
             {
                 if (this.treeView != null)
+                {
                     FindControlItem(this.treeView);
+                }
             }
 
             if (ViewDeterminant == "X")
